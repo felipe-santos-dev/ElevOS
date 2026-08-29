@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { IconInfo, IconLogo } from '../../components/Icons'
+import { LogoMark } from '../../components/Logo'
+import { IconInfo } from '../../components/Icons'
 import { elevadores, perguntas, TOTAL_PERGUNTAS_BANCO } from '../../data/mock'
 
 const OPCOES = [
@@ -42,8 +43,8 @@ export default function FluxoPerguntas() {
     <div className="flex min-h-screen flex-col bg-slate-50">
       {/* Topbar */}
       <header className="flex h-[68px] shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 sm:px-6">
-        <Link to="/sindico" className="flex items-center gap-2.5 shrink-0">
-          <IconLogo className="w-8 h-8" />
+        <Link to="/sindico" aria-label="ElevOS" className="flex shrink-0 items-center gap-2.5">
+          <LogoMark className="w-8 h-8" />
           <span className="hidden text-[17px] font-extrabold tracking-tight sm:block">ElevOS</span>
         </Link>
         <span className="hidden h-6 w-px bg-slate-200 sm:block" />

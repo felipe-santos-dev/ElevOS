@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { ProbBar, Toast } from '../../components/UI'
-import { IconBox, IconCheck, IconCheckCircle, IconInfo, IconLogo, IconX } from '../../components/Icons'
+import { LogoMark } from '../../components/Logo'
+import { IconBox, IconCheck, IconCheckCircle, IconInfo, IconX } from '../../components/Icons'
 import { diagnostico, elevadores, perguntas } from '../../data/mock'
 
 const LABEL = { sim: 'Sim', nao: 'Não', 'nao-sei': 'Não sei' }
@@ -37,8 +38,8 @@ export default function Diagnostico() {
       </Toast>
 
       <header className="sticky top-0 z-30 flex h-[68px] items-center gap-3 border-b border-slate-200 bg-white px-4 sm:px-6">
-        <Link to="/sindico" className="flex items-center gap-2.5 shrink-0">
-          <IconLogo className="w-8 h-8" />
+        <Link to="/sindico" aria-label="ElevOS" className="shrink-0">
+          <LogoMark className="w-8 h-8" />
         </Link>
         <span className="h-6 w-px bg-slate-200" />
         <div className="min-w-0">

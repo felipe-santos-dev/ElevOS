@@ -151,10 +151,3 @@ export const IconHome = (p) => (
     <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
   </Svg>
 )
-export const IconLogo = ({ className = 'w-8 h-8' }) => (
-  <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
-    <rect width="32" height="32" rx="8" fill="#0a2d8f" />
-    <rect x="12.5" y="8" width="7" height="16" rx="2" fill="#fff" />
-    <rect x="14.5" y="10" width="3" height="12" rx="1" fill="#0a2d8f" />
-  </svg>
-)

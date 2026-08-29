@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { regioes, usuarios } from '../data/mock'
 import { Avatar, Select } from './UI'
+import { LogoMark } from './Logo'
 import { IconBell, IconBuilding, IconChart, IconGrid, IconList, IconSearch, IconUsers, IconX } from './Icons'
 
 const rail = [
@@ -55,11 +56,7 @@ export default function CentralLayout({ children, regiaoId, onRegiaoChange }) {
       {/* Rail desktop */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[72px] flex-col items-center gap-6 border-r border-slate-200 bg-white py-4">
         <button onClick={() => navigate('/central')} aria-label="Central OTIS" className="shrink-0">
-          <svg viewBox="0 0 32 32" className="w-9 h-9">
-            <rect width="32" height="32" rx="9" fill="#0a2d8f" />
-            <rect x="12.5" y="8" width="7" height="16" rx="2" fill="#fff" />
-            <rect x="14.5" y="10" width="3" height="12" rx="1" fill="#0a2d8f" />
-          </svg>
+          <LogoMark className="w-9 h-9" />
         </button>
         <Rail />
       </aside>
@@ -93,7 +90,10 @@ export default function CentralLayout({ children, regiaoId, onRegiaoChange }) {
               </svg>
             </button>
 
-            <span className="text-[17px] font-extrabold tracking-tight whitespace-nowrap">Central OTIS</span>
+            <span className="flex items-center gap-2.5 whitespace-nowrap lg:gap-0">
+              <LogoMark className="w-8 h-8 shrink-0 lg:hidden" />
+              <span className="text-[17px] font-extrabold tracking-tight">Central OTIS</span>
+            </span>
 
             {/* Seletor global de cidade/região — desktop e tablet */}
             <Select

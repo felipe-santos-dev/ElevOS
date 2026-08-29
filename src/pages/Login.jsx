@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconEye, IconEyeOff, IconLogo } from '../components/Icons'
+import Logo from '../components/Logo'
+import { IconEye, IconEyeOff } from '../components/Icons'
 
 const perfis = [
   { id: 'sindico', label: 'Síndico', rota: '/sindico', usuario: 'carlos.mendes' },
@@ -28,23 +29,26 @@ export default function Login() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Painel de marca */}
-      <div className="relative flex flex-col justify-between bg-otis-900 px-6 py-10 text-white sm:px-10 lg:px-14 lg:py-14">
-        <div className="flex items-center gap-2.5">
-          <IconLogo className="w-9 h-9" />
-          <span className="text-xl font-extrabold tracking-tight">ElevOS</span>
-        </div>
+      <div className="relative flex flex-col justify-between overflow-hidden bg-[#0A1020] px-6 py-10 text-white sm:px-10 lg:px-14 lg:py-14">
+        {/* brilho da marca ao fundo */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full opacity-30 blur-3xl"
+          style={{ background: 'radial-gradient(circle, #039ABC 0%, transparent 65%)' }}
+        />
+        <Logo tagline tone="light" size="lg" className="relative" />
 
-        <div className="my-10 lg:my-0 max-w-md">
+        <div className="relative my-10 lg:my-0 max-w-md">
           <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-[42px]">
             Sistema de Chamados
           </h1>
-          <p className="mt-4 text-[15px] leading-relaxed text-otis-100">
+          <p className="mt-4 text-[15px] leading-relaxed text-slate-400">
             Síndicos abrem chamados em cinco perguntas. A Central recebe o diagnóstico já explicado,
             com a probabilidade de cada causa.
           </p>
         </div>
 
-        <p className="text-xs text-otis-200">Challenge OTIS · FIAP · Grupo GLYFFS</p>
+        <p className="relative text-xs text-slate-500">Challenge OTIS · FIAP · Grupo GLYFFS</p>
       </div>
 
       {/* Formulário */}

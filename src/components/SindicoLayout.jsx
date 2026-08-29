@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { usuarios } from '../data/mock'
 import { Avatar } from './UI'
+import Logo from './Logo'
 import {
-  IconBell, IconBuilding, IconChart, IconList, IconLogo, IconSearch, IconSettings, IconX,
+  IconBell, IconBuilding, IconChart, IconList, IconSearch, IconSettings, IconX,
 } from './Icons'
 
 const nav = [
@@ -44,9 +45,8 @@ export default function SindicoLayout({ children }) {
     <div className="min-h-screen bg-slate-50">
       {/* Sidebar desktop */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-slate-200 bg-white">
-        <div className="flex items-center gap-2.5 px-5 h-[72px]">
-          <IconLogo className="w-8 h-8" />
-          <span className="text-[17px] font-extrabold tracking-tight">ElevOS</span>
+        <div className="flex items-center px-5 h-[72px]">
+          <Logo size="sm" />
         </div>
         <div className="flex-1 px-3">
           <NavItems />
@@ -65,10 +65,7 @@ export default function SindicoLayout({ children }) {
           <div className="absolute inset-0 bg-ink-900/40" onClick={() => setMenu(false)} />
           <aside className="absolute inset-y-0 left-0 w-72 max-w-[85%] bg-white p-3 shadow-pop animate-slide-down">
             <div className="flex items-center justify-between px-2 h-14">
-              <span className="flex items-center gap-2.5">
-                <IconLogo className="w-8 h-8" />
-                <span className="text-[17px] font-extrabold tracking-tight">ElevOS</span>
-              </span>
+              <Logo size="sm" />
               <button onClick={() => setMenu(false)} aria-label="Fechar menu" className="btn-ghost h-9 w-9 rounded-lg">
                 <IconX className="w-5 h-5" />
               </button>

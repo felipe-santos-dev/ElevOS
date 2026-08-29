@@ -13,6 +13,26 @@ Este repositório contém **apenas o front-end**. Todos os dados vêm de `src/da
 - Tailwind CSS 3
 - Zero dependência de biblioteca de ícones — SVG inline em `src/components/Icons.jsx`
 
+## Marca
+
+A logo vive em `src/components/Logo.jsx`, em SVG — escala sem perder nitidez e serve
+também de favicon (data URI em `index.html`).
+
+| Cor | Hex | Uso |
+|---|---|---|
+| Ciano ElevOS | `#039ABC` | símbolo, régua do slogan |
+| Navy do chevron | `#090D19` | chevrons, fundo do hero do login |
+| Azul de interface | `#0a2d8f` (`otis-900`) | botões e links |
+
+```jsx
+<LogoMark />          // só o símbolo
+<Logo />              // símbolo + "ElevOS"           → usado nas telas
+<Logo tagline />      // símbolo + "ElevOS" + slogan  → usado só no login
+```
+
+O slogan "Do registro à prevenção" aparece **apenas no login**. Nas telas internas
+a marca fica reduzida ao símbolo + wordmark, para não competir com o conteúdo.
+
 ## Rodar
 
 ```bash
