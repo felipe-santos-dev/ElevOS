@@ -1,0 +1,120 @@
+import { useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { IconInfo, IconLogo } from '../../components/Icons'
+import { elevadores, perguntas, TOTAL_PERGUNTAS_BANCO } from '../../data/mock'
+
+const OPCOES = [
+  { valor: 'sim', label: 'Sim' },
+  { valor: 'nao', label: 'Não' },
+  { valor: 'nao-sei', label: 'Não sei' },
+]
+
+export default function FluxoPerguntas() {
+  const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const rg = params.get('rg') ?? 'ES-1024'
+  const el = elevadores.find((e) => e.rg === rg) ?? elevadores[1]
+
+  const [indice, setIndice] = useState(0)
+  const [respostas, setRespostas] = useState({})
+
+  const pergunta = perguntas[indice]
+  const progresso = ((indice + 1) / TOTAL_PERGUNTAS_BANCO) * 100
+
+  const responder = (valor) => {
+    const novas = { ...respostas, [pergunta.id]: valor }
+    setRespostas(novas)
+
+    if (indice < perguntas.length - 1) {
+      setIndice(indice + 1)
+    } else {
+      // Motor atingiu confiança suficiente — encerra em 5 de 12 perguntas.
+      navigate(`/sindico/chamados/novo/diagnostico?rg=${rg}`, { state: { respostas: novas } })
+    }
+  }
+
+  const voltar = () => {
+    if (indice === 0) navigate(-1)
+    else setIndice(indice - 1)
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col bg-slate-50">
+      {/* Topbar */}
+      <header className="flex h-[68px] shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 sm:px-6">
+        <Link to="/sindico" className="flex items-center gap-2.5 shrink-0">
+          <IconLogo className="w-8 h-8" />
+          <span className="hidden text-[17px] font-extrabold tracking-tight sm:block">ElevOS</span>
+        </Link>
+        <span className="hidden h-6 w-px bg-slate-200 sm:block" />
+        <div className="min-w-0">
+          <p className="text-[15px] font-bold leading-tight">Novo chamado</p>
+          <p className="truncate text-[13px] text-ink-500">
+            {el.torre} · {el.nome} · RG {el.rg}
+          </p>
+        </div>
+        <Link to="/" className="ml-auto text-[13px] font-semibold text-ink-500 hover:text-ink-900">
+          Sair
+        </Link>
+      </header>
+
+      {/* Conteúdo */}
+      <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6">
+        <div className="w-full max-w-2xl">
+          {/* Progresso */}
+          <div className="flex items-center gap-4">
+            <div className="h-1 flex-1 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full rounded-full bg-otis-900 transition-[width] duration-500 ease-out"
+                style={{ width: `${progresso}%` }}
+              />
+            </div>
+            <span className="shrink-0 text-[13px] font-semibold text-ink-500">
+              <span className="text-ink-900">{indice + 1}</span> / {TOTAL_PERGUNTAS_BANCO}
+            </span>
+          </div>
+
+          {/* Card da pergunta */}
+          <div key={pergunta.id} className="card mt-6 animate-fade-up px-5 py-8 text-center sm:px-10 sm:py-10">
+            <h1 className="text-xl font-extrabold leading-snug tracking-tight sm:text-[26px]">
+              {pergunta.titulo}
+            </h1>
+            <p className="mt-2.5 text-sm text-ink-500">{pergunta.ajuda}</p>
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-3">
+              {OPCOES.map((o) => {
+                const ativo = respostas[pergunta.id] === o.valor
+                const estilo =
+                  o.valor === 'nao-sei'
+                    ? 'bg-slate-100 text-ink-500 hover:bg-slate-200'
+                    : o.valor === 'sim'
+                    ? 'bg-otis-900 text-white hover:bg-otis-950'
+                    : 'bg-white text-ink-900 border border-slate-300 hover:bg-slate-50'
+                return (
+                  <button
+                    key={o.valor}
+                    onClick={() => responder(o.valor)}
+                    className={`btn btn-lg w-full ${estilo} ${ativo ? 'ring-2 ring-otis-500 ring-offset-2' : ''}`}
+                  >
+                    {o.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Rodapé */}
+          <div className="mt-5 flex flex-col items-center justify-between gap-3 text-[13px] sm:flex-row">
+            <button onClick={voltar} className="font-semibold text-ink-500 hover:text-ink-900">
+              Voltar
+            </button>
+            <span className="flex items-center gap-1.5 text-ink-500">
+              <IconInfo className="w-4 h-4 shrink-0" />
+              Suas respostas alimentam o diagnóstico probabilístico
+            </span>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
