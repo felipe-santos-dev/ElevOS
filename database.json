@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "condominio": "Edifício Aurora",
+    "bloco": "Torre Única",
+    "elevador": "Elevador 03",
+    "rg": "ES-3305",
+    "status": "Resolvido",
+    "diagnostico": {
+      "tipo": "Certeza",
+      "falha_principal": "Motor",
+      "pecas_sugeridas": ["Motor X34", "Rolamento"],
+      "confianca": 100.0
+    },
+    "tecnico": "Rafael Silva",
+    "eta": null,
+    "feedback": {
+      "correto": true,
+      "observacoes": "Motor e rolamento trocados. Elevador testado e funcionando normalmente."
+    }
+  },
+  {
+    "id": 2,
+    "condominio": "Condomínio Vista Verde",
+    "bloco": "Torre A",
+    "elevador": "Elevador 02",
+    "rg": "ES-1024",
+    "status": "A caminho",
+    "diagnostico": {
+      "tipo": "Provável",
+      "falha_principal": "Motor",
+      "pecas_sugeridas": ["Motor X34", "Rolamento", "Cabo de Aço", "Polia", "Lubrificante"],
+      "confianca": 66.67
+    },
+    "tecnico": "Rafael Silva",
+    "eta": 25,
+    "feedback": null
+  },
+  {
+    "id": 3,
+    "condominio": "Residencial Pico",
+    "bloco": "Bloco Único",
+    "elevador": "Elevador 01",
+    "rg": "ES-4101",
+    "status": "Aberto",
+    "diagnostico": {
+      "tipo": "Dúvida",
+      "falha_principal": "Porta",
+      "pecas_sugeridas": ["Atuador de Porta", "Fechadura Elétrica", "Sensor de Porta", "Sensor de Presença"],
+      "confianca": 52.0
+    },
+    "tecnico": null,
+    "eta": null,
+    "feedback": null
+  },
+  {
+    "id": 4,
+    "condominio": "Centro Comercial Rio",
+    "bloco": "Ala Norte",
+    "elevador": "Elevador 04",
+    "rg": "ES-5540",
+    "status": "Aberto",
+    "diagnostico": {
+      "tipo": "Incerteza",
+      "falha_principal": "Motor",
+      "pecas_sugeridas": [
+        "Motor X34", "Rolamento",
+        "Pastilha de Freio", "Sensor de Desgaste",
+        "Atuador de Porta", "Fechadura Elétrica",
+        "Sensor de Porta", "Sensor de Presença",
+        "Cabo de Aço", "Polia", "Lubrificante",
+        "Contator", "Fusível", "Relé"
+      ],
+      "confianca": 0.0
+    },
+    "tecnico": null,
+    "eta": null,
+    "feedback": null
+  }
+]

@@ -151,3 +151,38 @@ export const IconHome = (p) => (
     <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
   </Svg>
 )
+export const IconWifi = (p) => (
+  <Svg {...p}>
+    <path d="M5 12.5a11 11 0 0 1 14 0" />
+    <path d="M8.2 16a6.5 6.5 0 0 1 7.6 0" />
+    <path d="M12 19.5h.01" />
+  </Svg>
+)
+export const IconCpu = (p) => (
+  <Svg {...p}>
+    <rect x="6" y="6" width="12" height="12" rx="2" />
+    <path d="M6 10H3M6 14H3M21 10h-3M21 14h-3M10 6V3M14 6V3M10 21v-3M14 21v-3" />
+  </Svg>
+)
+export const IconAlertTriangle = (p) => (
+  <Svg {...p}>
+    <path d="M10.3 3.9 2.6 18a1.5 1.5 0 0 0 1.3 2.2h16.2a1.5 1.5 0 0 0 1.3-2.2L13.7 3.9a1.5 1.5 0 0 0-2.6 0Z" />
+    <path d="M12 9v4M12 16.5h.01" />
+  </Svg>
+)
+export const IconCalendarPlus = (p) => (
+  <Svg {...p}>
+    <rect x="3" y="5" width="18" height="16" rx="2.5" />
+    <path d="M3 10h18M8 3v4M16 3v4M9 15.5l2 2 4-4.2" />
+  </Svg>
+)
+export const IconTrend = (p) => (
+  <Svg {...p}>
+    <path d="M7 17L17 7M17 7H9M17 7V15" />
+  </Svg>
+)
+export const IconMinus = (p) => (
+  <Svg {...p}>
+    <path d="M5 12h14" />
+  </Svg>
+)

@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import CentralLayout from '../../components/CentralLayout'
-import { Badge, StatusDot } from '../../components/UI'
-import { IconBuilding, IconChevronDown, IconHome, IconMapPin } from '../../components/Icons'
+import { Badge, StatusDot, TecnologiaChip } from '../../components/UI'
+import { IconBuilding, IconChevronDown, IconHome, IconMapPin, IconPlus } from '../../components/Icons'
 import { condominios, regioes } from '../../data/mock'
 
 function Legenda() {
@@ -51,9 +51,10 @@ export default function VisaoElevadores() {
         {/* Tabela / árvore */}
         <section className="card mt-5 overflow-hidden">
           {/* Cabeçalho — só desktop */}
-          <div className="hidden border-b border-slate-200 bg-slate-50 px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-ink-500 lg:grid lg:grid-cols-[minmax(0,1fr)_120px_130px_140px_90px] lg:gap-4">
+          <div className="hidden border-b border-slate-200 bg-slate-50 px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-ink-500 lg:grid lg:grid-cols-[minmax(0,1fr)_110px_130px_120px_130px_190px] lg:gap-4">
             <span>Estrutura</span>
             <span>RG</span>
+            <span>Tecnologia</span>
             <span>Status</span>
             <span>Último chamado</span>
             <span className="text-right">Ações</span>
@@ -112,7 +113,7 @@ export default function VisaoElevadores() {
                             bloco.elevadores.map((el) => (
                               <div
                                 key={el.rg}
-                                className="grid grid-cols-1 gap-1.5 border-t border-slate-100 bg-white py-3.5 pl-10 pr-4 transition-colors hover:bg-otis-50/40 sm:pl-16 sm:pr-5 lg:grid-cols-[minmax(0,1fr)_120px_130px_140px_90px] lg:items-center lg:gap-4 lg:py-3"
+                                className="grid grid-cols-1 gap-1.5 border-t border-slate-100 bg-white py-3.5 pl-10 pr-4 transition-colors hover:bg-otis-50/40 sm:pl-16 sm:pr-5 lg:grid-cols-[minmax(0,1fr)_110px_130px_120px_130px_190px] lg:items-center lg:gap-4 lg:py-3"
                               >
                                 <span className="flex items-center gap-2.5">
                                   <StatusDot status={el.status} />
@@ -120,18 +121,28 @@ export default function VisaoElevadores() {
                                 </span>
                                 <span className="pl-[18px] text-[13px] text-ink-500 lg:pl-0">{el.rg}</span>
                                 <span className="pl-[18px] lg:pl-0">
+                                  <TecnologiaChip tecnologia={el.tecnologia} />
+                                </span>
+                                <span className="pl-[18px] lg:pl-0">
                                   <Badge status={el.status} />
                                 </span>
                                 <span className="pl-[18px] text-[13px] text-ink-500 lg:pl-0">
                                   <span className="lg:hidden">Último chamado: </span>
                                   {el.ultimoChamado}
                                 </span>
-                                <span className="pl-[18px] lg:pl-0 lg:text-right">
+                                <span className="flex items-center gap-3 pl-[18px] lg:justify-end lg:pl-0">
                                   <Link
-                                    to={`/sindico/elevadores/${el.rg}`}
+                                    to={`/central/elevadores/${el.rg}`}
                                     className="text-[13px] font-semibold text-otis-700 hover:text-otis-900"
                                   >
                                     Detalhes
+                                  </Link>
+                                  <Link
+                                    to={`/central/chamados/novo?rg=${el.rg}`}
+                                    className="flex items-center gap-1 text-[13px] font-semibold text-ink-700 hover:text-ink-900"
+                                  >
+                                    <IconPlus className="w-3.5 h-3.5" />
+                                    Abrir chamado
                                   </Link>
                                 </span>
                               </div>

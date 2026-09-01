@@ -1,30 +1,34 @@
 import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import TecnicoShell from '../../components/TecnicoShell'
-import { Badge, ProbBar, Toast } from '../../components/UI'
+import { Badge, NivelBadge, ProbBar, StatusStepper, Toast } from '../../components/UI'
 import { IconBox, IconCheckCircle, IconChevronLeft, IconClock, IconMapPin } from '../../components/Icons'
-import { chamadosUrgentes } from '../../data/mock'
+import { usuarios } from '../../data/mock'
+import { useChamados } from '../../state/ChamadosContext'
 
 export default function DetalheChamado() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const chamado = chamadosUrgentes.find((c) => c.id === id)
+  const { chamados, confirmarSaida } = useChamados()
+  const chamado = chamados.find((c) => c.id === id)
+  const u = usuarios.tecnico
 
   const [minutos, setMinutos] = useState(25)
-  const [aceito, setAceito] = useState(false)
+  const [confirmado, setConfirmado] = useState(false)
 
-  if (!chamado) return <Navigate to="/tecnico" replace />
+  // Só é possível ver o chamado se ele estiver atribuído a este técnico.
+  if (!chamado || chamado.tecnicoId !== u.id) return <Navigate to="/tecnico" replace />
 
-  const aceitar = () => {
-    setAceito(true)
-    setTimeout(() => navigate(`/tecnico/chamados/${chamado.id}/finalizar`), 1600)
+  const saida = () => {
+    confirmarSaida(chamado.id)
+    setConfirmado(true)
   }
 
   return (
     <TecnicoShell>
-      <Toast show={aceito}>
+      <Toast show={confirmado}>
         <IconCheckCircle className="w-5 h-5 shrink-0" />
-        Chamado aceito · Status atualizado para “A caminho”
+        Saída confirmada · status atualizado para “A caminho”
       </Toast>
 
       <header className="sticky top-0 z-20 flex shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-2 py-3">
@@ -53,31 +57,48 @@ export default function DetalheChamado() {
           </span>
         </div>
 
-        {/* Diagnóstico */}
+        {/* Situação */}
         <section className="card mt-4 p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[15px] font-bold">Diagnóstico</h2>
-            <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">
-              {chamado.confianca}%
-            </span>
+          <h2 className="text-[15px] font-bold">Situação</h2>
+          <div className="mt-3.5">
+            <StatusStepper status={chamado.status} />
           </div>
-          <ul className="mt-3.5 space-y-2.5">
-            {chamado.causas.map((c, i) => (
-              <li key={c.nome} className="grid grid-cols-[86px_1fr_40px] items-center gap-2.5">
-                <span className="truncate text-[13px] font-medium">{c.nome}</span>
-                <ProbBar value={c.probabilidade} tone={i === 0 ? 'otis' : 'soft'} delay={i * 120} />
-                <span className="text-right text-[13px] font-bold tabular-nums">{c.probabilidade}%</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 flex items-start gap-2 border-t border-slate-100 pt-3 text-[13px] text-ink-700">
-            <IconBox className="w-4 h-4 mt-0.5 shrink-0 text-ink-500" />
-            <span>
-              <span className="font-semibold">Peças: </span>
-              {chamado.pecas.join(', ')}
-            </span>
-          </p>
         </section>
+
+        {/* Diagnóstico */}
+        {chamado.causas.length > 0 ? (
+          <section className="card mt-4 p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[15px] font-bold">Diagnóstico</h2>
+              <NivelBadge confianca={chamado.confianca} />
+            </div>
+            <ul className="mt-3.5 space-y-2.5">
+              {chamado.causas.map((c, i) => (
+                <li key={c.nome} className="grid grid-cols-[86px_1fr_40px] items-center gap-2.5">
+                  <span className="truncate text-[13px] font-medium">{c.nome}</span>
+                  <ProbBar value={c.probabilidade} tone={i === 0 ? 'otis' : 'soft'} delay={i * 120} />
+                  <span className="text-right text-[13px] font-bold tabular-nums">{c.probabilidade}%</span>
+                </li>
+              ))}
+            </ul>
+            {chamado.pecas.length > 0 && (
+              <p className="mt-4 flex items-start gap-2 border-t border-slate-100 pt-3 text-[13px] text-ink-700">
+                <IconBox className="w-4 h-4 mt-0.5 shrink-0 text-ink-500" />
+                <span>
+                  <span className="font-semibold">Peças: </span>
+                  {chamado.pecas.join(', ')}
+                </span>
+              </p>
+            )}
+          </section>
+        ) : (
+          <section className="card mt-4 p-4">
+            <h2 className="text-[15px] font-bold">Diagnóstico</h2>
+            <p className="mt-2 text-[13px] text-ink-500">
+              Chamado aberto manualmente — sem diagnóstico automático. Avalie no local.
+            </p>
+          </section>
+        )}
 
         {/* Orientação */}
         <p className="mt-4 rounded-xl border border-otis-200 border-l-4 border-l-otis-600 bg-otis-50 p-4 text-[13px] leading-relaxed text-ink-700">
@@ -119,14 +140,22 @@ export default function DetalheChamado() {
         </section>
       </div>
 
-      {/* Ações fixas */}
-      <div className="shrink-0 space-y-2 border-t border-slate-200 bg-white px-4 py-3">
-        <button onClick={aceitar} disabled={aceito} className="btn-primary btn-lg w-full">
-          {aceito ? 'Chamado aceito' : 'Aceitar chamado'}
-        </button>
-        <button onClick={() => navigate('/tecnico')} className="btn-ghost btn-md w-full text-rose-600 hover:bg-rose-50 hover:text-rose-700">
-          Recusar chamado
-        </button>
+      {/* Ação fixa — não existe "aceitar", só confirmar saída. O ciclo só
+          se fecha quando o feedback é salvo em Finalizar. */}
+      <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-3">
+        {chamado.status === 'a-caminho' || chamado.status === 'concluido' ? (
+          <button
+            onClick={() => navigate(`/tecnico/chamados/${chamado.id}/finalizar`)}
+            disabled={chamado.status === 'concluido'}
+            className="btn-primary btn-lg w-full"
+          >
+            {chamado.status === 'concluido' ? 'Chamado concluído' : 'Registrar finalização'}
+          </button>
+        ) : (
+          <button onClick={saida} className="btn-primary btn-lg w-full">
+            Confirmar saída
+          </button>
+        )}
       </div>
     </TecnicoShell>
   )

@@ -23,6 +23,8 @@ export default function Login() {
 
   const entrar = (e) => {
     e.preventDefault()
+    // Sinaliza para a tela de destino exibir o alerta de chamado ao entrar.
+    sessionStorage.setItem('elevos:alerta-login', '1')
     navigate(perfis.find((p) => p.id === perfil).rota)
   }
 
@@ -43,7 +45,7 @@ export default function Login() {
             Sistema de Chamados
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-slate-400">
-            Síndicos abrem chamados em cinco perguntas. A Central recebe o diagnóstico já explicado,
+            Síndicos abrem chamados em doze perguntas. A Central recebe o diagnóstico já explicado,
             com a probabilidade de cada causa.
           </p>
         </div>

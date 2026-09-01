@@ -1,14 +1,22 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import TecnicoShell from '../../components/TecnicoShell'
-import { Avatar, Badge } from '../../components/UI'
+import { Avatar, Badge, NivelBadge } from '../../components/UI'
 import { IconBell, IconChevronRight, IconClock, IconMapPin } from '../../components/Icons'
-import { chamadosUrgentes, preventivas, usuarios } from '../../data/mock'
+import { preventivas, usuarios } from '../../data/mock'
+import { useChamados } from '../../state/ChamadosContext'
 
 export default function AgendaTecnico() {
   const [aba, setAba] = useState('urgentes')
   const navigate = useNavigate()
   const u = usuarios.tecnico
+  const { chamados } = useChamados()
+
+  // Só aparecem chamados atribuídos a este técnico e que ainda não foram concluídos.
+  const meusChamados = useMemo(
+    () => chamados.filter((c) => c.tecnicoId === u.id && c.status !== 'concluido'),
+    [chamados, u.id],
+  )
 
   return (
     <TecnicoShell>
@@ -32,7 +40,7 @@ export default function AgendaTecnico() {
         <div className="flex gap-6 px-4">
           {[
             { id: 'preventivas', label: 'Preventivas', badge: null },
-            { id: 'urgentes', label: 'Urgentes', badge: chamadosUrgentes.length },
+            { id: 'urgentes', label: 'Urgentes', badge: meusChamados.length },
           ].map((t) => (
             <button
               key={t.id}
@@ -61,7 +69,7 @@ export default function AgendaTecnico() {
       <div className="flex-1 overflow-y-auto scrollbar-thin px-4 pb-8 pt-4">
         {aba === 'urgentes' ? (
           <ul className="space-y-3">
-            {chamadosUrgentes.map((c, i) => (
+            {meusChamados.map((c, i) => (
               <li key={c.id}>
                 <button
                   onClick={() => navigate(`/tecnico/chamados/${c.id}`)}
@@ -74,8 +82,9 @@ export default function AgendaTecnico() {
                       <Badge status={c.urgencia === 'Alta' ? 'manutencao' : 'aguardando'}>{c.urgencia}</Badge>
                     </span>
                     <span className="mt-0.5 block text-[13px] text-ink-500">RG: {c.rg}</span>
-                    <span className="mt-2 block text-[13px] font-semibold text-otis-700">
-                      {c.causa} — {c.confianca}% de confiança
+                    <span className="mt-2 flex items-center gap-2">
+                      <span className="text-[13px] font-semibold text-otis-700">{c.causa}</span>
+                      <NivelBadge confianca={c.confianca} />
                     </span>
                     <span className="mt-2 flex items-center gap-4 text-[13px] text-ink-500">
                       <span className="flex items-center gap-1.5">
@@ -92,6 +101,9 @@ export default function AgendaTecnico() {
                 </button>
               </li>
             ))}
+            {meusChamados.length === 0 && (
+              <li className="py-12 text-center text-[13px] text-ink-500">Nenhum chamado atribuído a você no momento.</li>
+            )}
           </ul>
         ) : (
           <>

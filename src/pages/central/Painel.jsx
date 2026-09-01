@@ -1,36 +1,47 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import CentralLayout from '../../components/CentralLayout'
-import { ProbBar, ScoreBar, StatusDot, riskTone } from '../../components/UI'
+import { Badge, NivelBadge, RiskBadge, ScoreBar, TrendChip, riskTone } from '../../components/UI'
 import { IconChevronRight } from '../../components/Icons'
 import { condominios, regioes, riskScore } from '../../data/mock'
+import { useChamados } from '../../state/ChamadosContext'
+
+const CHAMADO_STATUS = {
+  aberto: { badge: 'aberto', label: 'Aberto' },
+  atribuido: { badge: 'aguardando', label: 'Atribuído' },
+  'a-caminho': { badge: 'a-caminho', label: 'A caminho' },
+  concluido: { badge: 'resolvido', label: 'Concluído' },
+}
 
 export default function Painel() {
   const [regiaoId, setRegiaoId] = useState('sp-zona-sul')
   const regiao = regioes.find((r) => r.id === regiaoId)
+  const { chamados } = useChamados()
 
   const dados = useMemo(() => {
     const conds = condominios.filter((c) => c.regiaoId === regiaoId)
     const elevs = conds.flatMap((c) => c.blocos.flatMap((b) => b.elevadores))
     const risco = riskScore.filter((r) => r.regiaoId === regiaoId)
-    const criticos = risco.filter((r) => r.score >= 81).length
+    const criticos = risco.filter((r) => r.score >= 81)
+    const criticosNet = criticos.reduce(
+      (acc, r) => acc + (r.tendencia === 'subindo' ? 1 : r.tendencia === 'descendo' ? -1 : 0),
+      0,
+    )
     return {
       conds: conds.length,
       total: elevs.length,
-      normal: elevs.filter((e) => e.status === 'normal').length,
-      aguardando: elevs.filter((e) => e.status === 'aguardando').length,
       manutencao: elevs.filter((e) => e.status === 'manutencao').length,
-      criticos,
+      aguardando: elevs.filter((e) => e.status === 'aguardando').length,
+      criticos: criticos.length,
+      criticosNet,
       topRisco: risco.slice(0, 5),
     }
   }, [regiaoId])
 
-  const fleetHealth = dados.total ? Math.round((dados.normal / dados.total) * 100) : 0
-
   const kpis = [
     { titulo: 'Elevadores monitorados', valor: dados.total, obs: `${dados.conds} condomínios` },
     { titulo: 'Em manutenção', valor: dados.manutencao, obs: `${dados.aguardando} aguardando` },
-    { titulo: 'Risco crítico', valor: dados.criticos, obs: 'score acima de 80' },
+    { titulo: 'Risco crítico', valor: dados.criticos, obs: 'score acima de 80', trend: dados.criticosNet },
     { titulo: 'First Time Fix', valor: '71%', obs: 'meta do projeto: 86%' },
   ]
 
@@ -46,33 +57,48 @@ export default function Painel() {
           {kpis.map((k, i) => (
             <div key={k.titulo} className="card animate-fade-up p-5" style={{ animationDelay: `${i * 60}ms` }}>
               <p className="text-[13px] text-ink-500">{k.titulo}</p>
-              <p className="mt-2 text-[30px] font-extrabold leading-none tracking-tight tabular-nums">{k.valor}</p>
+              <span className="mt-2 flex items-baseline justify-between">
+                <span className="text-[30px] font-extrabold leading-none tracking-tight tabular-nums">{k.valor}</span>
+                {k.trend != null && (
+                  <TrendChip tendencia={k.trend > 0 ? 'subindo' : k.trend < 0 ? 'descendo' : 'estavel'} variacao={k.trend} />
+                )}
+              </span>
               <p className="mt-1.5 text-[13px] text-ink-500">{k.obs}</p>
             </div>
           ))}
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
-          <section className="card p-5">
-            <h2 className="text-[15px] font-bold">Fleet Health</h2>
-            <p className="mt-1 text-[13px] text-ink-500">Estado atual da carteira desta região</p>
-            <p className="mt-4 text-[40px] font-extrabold leading-none tracking-tight">{fleetHealth}%</p>
-            <div className="mt-4 space-y-3">
-              {[
-                { label: 'Normal', qtd: dados.normal, status: 'normal', tone: 'otis' },
-                { label: 'Aguardando', qtd: dados.aguardando, status: 'aguardando', tone: 'soft' },
-                { label: 'Manutenção', qtd: dados.manutencao, status: 'manutencao', tone: 'faint' },
-              ].map((l, i) => (
-                <div key={l.label} className="grid grid-cols-[110px_1fr_32px] items-center gap-3">
-                  <span className="flex items-center gap-2 text-[13px] font-medium">
-                    <StatusDot status={l.status} />
-                    {l.label}
-                  </span>
-                  <ProbBar value={dados.total ? (l.qtd / dados.total) * 100 : 0} tone={l.tone} delay={i * 100} />
-                  <span className="text-right text-[13px] font-bold tabular-nums">{l.qtd}</span>
-                </div>
-              ))}
-            </div>
+          <section className="card overflow-hidden">
+            <header className="flex items-center justify-between px-5 py-4">
+              <h2 className="text-[15px] font-bold">Chamados recentes</h2>
+              <Link to="/central/chamados" className="flex items-center gap-1 text-[13px] font-semibold text-otis-700 hover:text-otis-900">
+                Ver todos
+                <IconChevronRight className="w-4 h-4" />
+              </Link>
+            </header>
+            <ul className="divide-y divide-slate-100 border-t border-slate-100">
+              {chamados.slice(0, 5).map((c) => {
+                const st = CHAMADO_STATUS[c.status] ?? CHAMADO_STATUS.aberto
+                return (
+                  <li key={c.id} className="flex items-center gap-3 px-5 py-3">
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span className="truncate text-[13px] font-semibold">{c.local}</span>
+                        <Badge status={st.badge}>{st.label}</Badge>
+                      </span>
+                      <span className="mt-0.5 block truncate text-[13px] text-ink-500">
+                        {c.rg} · {c.tecnicoNome ?? 'Aguardando aceite'}
+                      </span>
+                    </span>
+                    <NivelBadge confianca={c.confianca} />
+                  </li>
+                )
+              })}
+              {chamados.length === 0 && (
+                <li className="px-5 py-10 text-center text-sm text-ink-500">Nenhum chamado no momento.</li>
+              )}
+            </ul>
           </section>
 
           <section className="card overflow-hidden">
@@ -93,12 +119,13 @@ export default function Painel() {
                       <span className="block truncate text-[13px] font-semibold">{r.elevador} · {r.rg}</span>
                       <span className="block truncate text-[13px] text-ink-500">{r.condominio}</span>
                     </span>
-                    <span className="hidden w-24 shrink-0 sm:block">
+                    <span className="hidden w-20 shrink-0 sm:block">
                       <ScoreBar score={r.score} />
                     </span>
-                    <span className={`w-16 shrink-0 text-right text-[13px] font-bold ${tone.chip} tabular-nums`}>
+                    <span className={`w-10 shrink-0 text-right text-[13px] font-bold ${tone.chip} tabular-nums`}>
                       {r.score}
                     </span>
+                    <RiskBadge score={r.score} className="shrink-0" />
                   </li>
                 )
               })}

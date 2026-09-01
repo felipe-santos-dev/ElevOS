@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { LogoMark } from '../../components/Logo'
 import { IconInfo } from '../../components/Icons'
-import { elevadores, perguntas, TOTAL_PERGUNTAS_BANCO } from '../../data/mock'
+import { perguntas, TOTAL_PERGUNTAS_BANCO } from '../../data/mock'
+import { buscarElevador } from '../../utils/elevadores'
 
 const OPCOES = [
   { valor: 'sim', label: 'Sim' },
@@ -10,11 +11,15 @@ const OPCOES = [
   { valor: 'nao-sei', label: 'Não sei' },
 ]
 
-export default function FluxoPerguntas() {
+// O mesmo fluxo de 12 perguntas serve o síndico (/sindico/...) e a
+// Central (/central/...) — só muda para onde ele navega no final.
+export default function FluxoPerguntas({ origem = 'sindico' }) {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const rg = params.get('rg') ?? 'ES-1024'
-  const el = elevadores.find((e) => e.rg === rg) ?? elevadores[1]
+  const el = buscarElevador(rg) ?? buscarElevador('ES-1024')
+  const rotaRaiz = origem === 'central' ? '/central/elevadores' : '/sindico'
+  const rotaDiagnostico = origem === 'central' ? '/central/chamados/novo/diagnostico' : '/sindico/chamados/novo/diagnostico'
 
   const [indice, setIndice] = useState(0)
   const [respostas, setRespostas] = useState({})
@@ -29,8 +34,7 @@ export default function FluxoPerguntas() {
     if (indice < perguntas.length - 1) {
       setIndice(indice + 1)
     } else {
-      // Motor atingiu confiança suficiente — encerra em 5 de 12 perguntas.
-      navigate(`/sindico/chamados/novo/diagnostico?rg=${rg}`, { state: { respostas: novas } })
+      navigate(`${rotaDiagnostico}?rg=${rg}`, { state: { respostas: novas } })
     }
   }
 
@@ -43,7 +47,7 @@ export default function FluxoPerguntas() {
     <div className="flex min-h-screen flex-col bg-slate-50">
       {/* Topbar */}
       <header className="flex h-[68px] shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 sm:px-6">
-        <Link to="/sindico" aria-label="ElevOS" className="flex shrink-0 items-center gap-2.5">
+        <Link to={rotaRaiz} aria-label="ElevOS" className="flex shrink-0 items-center gap-2.5">
           <LogoMark className="w-8 h-8" />
           <span className="hidden text-[17px] font-extrabold tracking-tight sm:block">ElevOS</span>
         </Link>
@@ -51,7 +55,7 @@ export default function FluxoPerguntas() {
         <div className="min-w-0">
           <p className="text-[15px] font-bold leading-tight">Novo chamado</p>
           <p className="truncate text-[13px] text-ink-500">
-            {el.torre} · {el.nome} · RG {el.rg}
+            {el.local} · RG {el.rg}
           </p>
         </div>
         <Link to="/" className="ml-auto text-[13px] font-semibold text-ink-500 hover:text-ink-900">

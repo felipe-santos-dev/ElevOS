@@ -3,7 +3,8 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import TecnicoShell from '../../components/TecnicoShell'
 import { Toast } from '../../components/UI'
 import { IconCheckCircle, IconChevronLeft, IconPlus, IconX, IconXCircle } from '../../components/Icons'
-import { chamadosUrgentes, pecasDisponiveis } from '../../data/mock'
+import { pecasDisponiveis, usuarios } from '../../data/mock'
+import { useChamados } from '../../state/ChamadosContext'
 
 const RESULTADOS = [
   { id: 'resolvido', titulo: 'Resolvido', obs: 'Serviço concluído no local', Icon: IconCheckCircle, cor: 'emerald' },
@@ -19,7 +20,9 @@ const AVALIACOES = [
 export default function FinalizarChamado() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const chamado = chamadosUrgentes.find((c) => c.id === id)
+  const { chamados, salvarFeedback } = useChamados()
+  const chamado = chamados.find((c) => c.id === id)
+  const u = usuarios.tecnico
 
   const [resultado, setResultado] = useState('resolvido')
   const [avaliacao, setAvaliacao] = useState('sim')
@@ -33,7 +36,8 @@ export default function FinalizarChamado() {
   const [addAberto, setAddAberto] = useState(false)
   const [salvo, setSalvo] = useState(false)
 
-  if (!chamado) return <Navigate to="/tecnico" replace />
+  // Só é possível finalizar um chamado atribuído a este técnico.
+  if (!chamado || chamado.tecnicoId !== u.id) return <Navigate to="/tecnico" replace />
 
   const removerPeca = (nome) => setPecas((p) => p.filter((x) => x.nome !== nome))
   const adicionarPeca = (nome) => {
@@ -42,6 +46,8 @@ export default function FinalizarChamado() {
   }
 
   const salvar = () => {
+    // O ciclo do chamado só se confirma (status "Concluído") aqui, ao salvar o feedback.
+    salvarFeedback(chamado.id, { resultado, avaliacao, observacoes, pecas })
     setSalvo(true)
     setTimeout(() => navigate('/tecnico'), 1800)
   }

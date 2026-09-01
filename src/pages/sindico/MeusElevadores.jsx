@@ -1,16 +1,23 @@
 import { Link, useNavigate } from 'react-router-dom'
 import SindicoLayout from '../../components/SindicoLayout'
-import { Badge, StatusLine } from '../../components/UI'
+import { Badge, LoginAlert, StatusLine, TecnologiaChip } from '../../components/UI'
 import { IconChevronRight, IconPlus } from '../../components/Icons'
 import { elevadores, ultimosChamadosSindico, usuarios } from '../../data/mock'
+import { useLoginAlert } from '../../hooks/useLoginAlert'
 
 export default function MeusElevadores() {
   const navigate = useNavigate()
   const u = usuarios.sindico
+  const alerta = useLoginAlert()
+  const ultimo = ultimosChamadosSindico[0]
 
   return (
     <SindicoLayout>
       <div className="mx-auto max-w-6xl">
+        <LoginAlert show={alerta.show} onClose={alerta.dismiss} titulo="Chamado aberto recentemente">
+          {ultimo.torre} · {ultimo.elevador} (RG {ultimo.rg}) — {ultimo.titulo}, registrado em {ultimo.data}.
+        </LoginAlert>
+
         {/* Cabeçalho */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -43,6 +50,7 @@ export default function MeusElevadores() {
                 {el.torre} · <span className="text-otis-900">{el.nome}</span>
               </p>
               <p className="mt-1 text-[13px] text-ink-500">RG: {el.rg}</p>
+              <TecnologiaChip tecnologia={el.tecnologia} className="mt-2.5" />
 
               <div className="mt-4 border-t border-slate-100 pt-3">
                 <p className="text-[13px] text-ink-500">{el.resumo}</p>

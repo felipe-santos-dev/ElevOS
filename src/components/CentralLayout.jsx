@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { regioes, usuarios } from '../data/mock'
-import { Avatar, Select } from './UI'
+import { Avatar, NivelBadge, Select } from './UI'
 import { LogoMark } from './Logo'
-import { IconBell, IconBuilding, IconChart, IconGrid, IconList, IconSearch, IconUsers, IconX } from './Icons'
+import { IconAlertTriangle, IconBell, IconBuilding, IconChart, IconGrid, IconList, IconSearch, IconUsers, IconX } from './Icons'
+import { useChamados } from '../state/ChamadosContext'
 
 const rail = [
   { to: '/central', label: 'Painel', Icon: IconGrid, end: true },
@@ -13,10 +14,61 @@ const rail = [
   { to: '/central/equipe', label: 'Equipe', Icon: IconUsers },
 ]
 
+// Popup central de "novo chamado" — aparece em qualquer tela da Central
+// enquanto houver um chamado aberto (do síndico, tipicamente) esperando
+// aceite, e some assim que a Central aceita ou dispensa.
+function AlertaChamadoAberto({ chamado, onFechar, onVerDiagnostico, onAceitar }) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink-900/50 p-4">
+      <div className="animate-fade-up w-full max-w-md rounded-2xl bg-white p-6 shadow-pop">
+        <div className="flex items-start gap-3.5">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+            <IconAlertTriangle className="w-5 h-5" />
+          </span>
+          <div className="min-w-0 flex-1 pt-1">
+            <p className="text-[15px] font-extrabold tracking-tight">Novo chamado aberto</p>
+            <p className="mt-0.5 truncate text-[13px] text-ink-500">
+              {chamado.local} · RG {chamado.rg}
+            </p>
+          </div>
+          <button
+            onClick={onFechar}
+            aria-label="Fechar"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-500 hover:bg-slate-100"
+          >
+            <IconX className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <NivelBadge confianca={chamado.confianca} />
+          {chamado.causa && <span className="text-[13px] font-medium text-ink-700">Causa provável: {chamado.causa}</span>}
+        </div>
+
+        {chamado.nota && (
+          <p className="mt-3 line-clamp-3 rounded-lg bg-otis-50 p-3 text-[13px] leading-relaxed text-ink-700">{chamado.nota}</p>
+        )}
+
+        <div className="mt-5 flex gap-2">
+          <button onClick={onVerDiagnostico} className="btn-outline btn-md flex-1">
+            Ver diagnóstico
+          </button>
+          <button onClick={onAceitar} className="btn-primary btn-md flex-1">
+            Aceitar chamado
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function CentralLayout({ children, regiaoId, onRegiaoChange }) {
   const [menu, setMenu] = useState(false)
   const navigate = useNavigate()
   const u = usuarios.central
+  const { chamados, alertasVistos, marcarAlertaVisto } = useChamados()
+
+  const pendente = chamados.find((c) => c.status === 'aberto' && !c.tecnicoId && !alertasVistos.has(c.id))
 
   const options = regioes.map((r) => ({ value: r.id, label: `${r.cidade} · ${r.regiao}` }))
 
@@ -53,6 +105,21 @@ export default function CentralLayout({ children, regiaoId, onRegiaoChange }) {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {pendente && (
+        <AlertaChamadoAberto
+          chamado={pendente}
+          onFechar={() => marcarAlertaVisto(pendente.id)}
+          onVerDiagnostico={() => {
+            marcarAlertaVisto(pendente.id)
+            navigate('/central/chamados', { state: { abrirDetalheId: pendente.id } })
+          }}
+          onAceitar={() => {
+            marcarAlertaVisto(pendente.id)
+            navigate(`/central/chamados/${pendente.id}/aceitar`)
+          }}
+        />
+      )}
+
       {/* Rail desktop */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[72px] flex-col items-center gap-6 border-r border-slate-200 bg-white py-4">
         <button onClick={() => navigate('/central')} aria-label="Central OTIS" className="shrink-0">
