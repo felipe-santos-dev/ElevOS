@@ -31,7 +31,7 @@ export default function FinalizarChamado() {
   )
   const [pecas, setPecas] = useState([
     { nome: 'Rolamento', qtd: 1 },
-    { nome: 'Graxa MP2', qtd: 1 },
+    { nome: 'Motor X34', qtd: 1 },
   ])
   const [addAberto, setAddAberto] = useState(false)
   const [salvo, setSalvo] = useState(false)

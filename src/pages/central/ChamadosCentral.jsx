@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import CentralLayout from '../../components/CentralLayout'
-import { Badge, NivelBadge, ProbBar, StatusStepper } from '../../components/UI'
+import { Badge, ConfiancaBar, NivelBadge, StatusStepper } from '../../components/UI'
 import { IconBox, IconClock, IconMapPin, IconUsers, IconX } from '../../components/Icons'
 import { useChamados } from '../../state/ChamadosContext'
 
@@ -43,13 +43,13 @@ function ModalDetalhes({ chamado, onClose }) {
 
         {chamado.causas.length > 0 && (
           <section className="mt-4">
-            <h3 className="text-[13px] font-bold text-ink-700">Probabilidades por causa</h3>
+            <h3 className="text-[13px] font-bold text-ink-700">Confiança por causa</h3>
             <ul className="mt-3 space-y-2.5">
               {chamado.causas.map((c, i) => (
                 <li key={c.nome} className="grid grid-cols-[86px_1fr_40px] items-center gap-2.5">
                   <span className="truncate text-[13px] font-medium">{c.nome}</span>
-                  <ProbBar value={c.probabilidade} tone={i === 0 ? 'otis' : 'soft'} delay={i * 100} />
-                  <span className="text-right text-[13px] font-bold tabular-nums">{c.probabilidade}%</span>
+                  <ConfiancaBar value={c.confianca} tone={i === 0 ? 'otis' : 'soft'} delay={i * 100} />
+                  <span className="text-right text-[13px] font-bold tabular-nums">{c.confianca}%</span>
                 </li>
               ))}
             </ul>
@@ -136,8 +136,8 @@ export default function ChamadosCentral() {
                   {c.causas.map((causa, idx) => (
                     <div key={causa.nome} className="grid grid-cols-[90px_1fr_40px] items-center gap-2.5">
                       <span className="truncate text-[13px] font-medium">{causa.nome}</span>
-                      <ProbBar value={causa.probabilidade} tone={idx === 0 ? 'otis' : 'soft'} delay={idx * 100} />
-                      <span className="text-right text-[13px] font-bold tabular-nums">{causa.probabilidade}%</span>
+                      <ConfiancaBar value={causa.confianca} tone={idx === 0 ? 'otis' : 'soft'} delay={idx * 100} />
+                      <span className="text-right text-[13px] font-bold tabular-nums">{causa.confianca}%</span>
                     </div>
                   ))}
                 </div>

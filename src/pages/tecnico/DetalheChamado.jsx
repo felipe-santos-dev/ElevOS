@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import TecnicoShell from '../../components/TecnicoShell'
-import { Badge, NivelBadge, ProbBar, StatusStepper, Toast } from '../../components/UI'
+import { Badge, ConfiancaBar, NivelBadge, StatusStepper, Toast } from '../../components/UI'
 import { IconBox, IconCheckCircle, IconChevronLeft, IconClock, IconMapPin } from '../../components/Icons'
 import { usuarios } from '../../data/mock'
 import { useChamados } from '../../state/ChamadosContext'
@@ -76,8 +76,8 @@ export default function DetalheChamado() {
               {chamado.causas.map((c, i) => (
                 <li key={c.nome} className="grid grid-cols-[86px_1fr_40px] items-center gap-2.5">
                   <span className="truncate text-[13px] font-medium">{c.nome}</span>
-                  <ProbBar value={c.probabilidade} tone={i === 0 ? 'otis' : 'soft'} delay={i * 120} />
-                  <span className="text-right text-[13px] font-bold tabular-nums">{c.probabilidade}%</span>
+                  <ConfiancaBar value={c.confianca} tone={i === 0 ? 'otis' : 'soft'} delay={i * 120} />
+                  <span className="text-right text-[13px] font-bold tabular-nums">{c.confianca}%</span>
                 </li>
               ))}
             </ul>

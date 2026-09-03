@@ -4,6 +4,7 @@ import { LogoMark } from '../../components/Logo'
 import { IconInfo } from '../../components/Icons'
 import { perguntas, TOTAL_PERGUNTAS_BANCO } from '../../data/mock'
 import { buscarElevador } from '../../utils/elevadores'
+import { calcularDiagnostico, LIMITE_CERTEZA } from '../../utils/diagnostico'
 
 const OPCOES = [
   { valor: 'sim', label: 'Sim' },
@@ -31,10 +32,18 @@ export default function FluxoPerguntas({ origem = 'sindico' }) {
     const novas = { ...respostas, [pergunta.id]: valor }
     setRespostas(novas)
 
-    if (indice < perguntas.length - 1) {
-      setIndice(indice + 1)
-    } else {
+    // Parada antecipada: igual a motor_simulacao.py — depois de cada
+    // resposta, recalcula a confiança de todas as falhas; se a maior
+    // já atingir o limite de certeza, encerra o questionário na hora,
+    // mesmo que ainda faltem perguntas no banco.
+    const diagnostico = calcularDiagnostico(perguntas, novas)
+    const maiorConfianca = diagnostico.causas[0]?.confianca ?? 0
+    const paradaAntecipada = diagnostico.confianca !== null && maiorConfianca >= LIMITE_CERTEZA
+
+    if (paradaAntecipada || indice >= perguntas.length - 1) {
       navigate(`${rotaDiagnostico}?rg=${rg}`, { state: { respostas: novas } })
+    } else {
+      setIndice(indice + 1)
     }
   }
 
@@ -115,7 +124,7 @@ export default function FluxoPerguntas({ origem = 'sindico' }) {
             </button>
             <span className="flex items-center gap-1.5 text-ink-500">
               <IconInfo className="w-4 h-4 shrink-0" />
-              Suas respostas alimentam o diagnóstico probabilístico
+              Suas respostas alimentam o diagnóstico por pontuação
             </span>
           </div>
         </div>

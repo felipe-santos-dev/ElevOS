@@ -1,5 +1,5 @@
 import SindicoLayout from '../../components/SindicoLayout'
-import { ProbBar } from '../../components/UI'
+import { ConfiancaBar } from '../../components/UI'
 import { IconDownload } from '../../components/Icons'
 import { elevadores } from '../../data/mock'
 
@@ -48,7 +48,7 @@ export default function Relatorios() {
               {causas.map((c, i) => (
                 <li key={c.nome} className="grid grid-cols-[120px_1fr_44px] items-center gap-3 sm:grid-cols-[150px_1fr_48px]">
                   <span className="truncate text-[13px] font-medium">{c.nome}</span>
-                  <ProbBar value={c.valor} tone={i === 0 ? 'otis' : 'soft'} delay={i * 100} />
+                  <ConfiancaBar value={c.valor} tone={i === 0 ? 'otis' : 'soft'} delay={i * 100} />
                   <span className="text-right text-[13px] font-bold tabular-nums">{c.valor}%</span>
                 </li>
               ))}

@@ -120,22 +120,25 @@ export const ultimosChamadosSindico = [
 ]
 
 // ---------- Fluxo de perguntas (entrada estruturada) ----------
-// Banco fixo de 12 perguntas. Cada uma aponta para uma causa
-// provável, com um peso — a confiança final é calculada a partir
-// das respostas (ver src/utils/diagnostico.js).
+// Banco fixo de 12 perguntas, igual ao motor_simulacao.py: cada
+// pergunta tem um peso (0 a 3) para cada uma das 6 falhas possíveis.
+// "sim" soma o peso, "não" subtrai o peso, "não sei" não altera nada
+// (ver src/utils/diagnostico.js).
+export const FALHAS = ['Motor', 'Freio', 'Porta', 'Sensor', 'Polia/Cabo', 'Contator Elétrico']
+
 export const perguntas = [
-  { id: 'q1', titulo: 'O elevador para entre andares?', ajuda: 'Considere as últimas 48 horas de uso', resumo: 'Para entre andares', causa: 'Motor', peso: 3 },
-  { id: 'q2', titulo: 'O elevador faz barulho metálico?', ajuda: 'Ouça durante a subida, com a cabine vazia', resumo: 'Barulho metálico', causa: 'Motor', peso: 3 },
-  { id: 'q3', titulo: 'A porta trava ao abrir?', ajuda: 'Teste no térreo e em mais um andar', resumo: 'Porta trava ao abrir', causa: 'Porta', peso: 3 },
-  { id: 'q4', titulo: 'Há vibração na subida?', ajuda: 'Perceptível ao encostar na parede da cabine', resumo: 'Vibração na subida', causa: 'Motor', peso: 2 },
-  { id: 'q5', titulo: 'A luz da cabine oscila?', ajuda: 'Observe com a porta fechada, em movimento', resumo: 'Luz da cabine oscila', causa: 'Sensor', peso: 2 },
-  { id: 'q6', titulo: 'O freio range ou treme ao parar?', ajuda: 'Perceba no instante em que a cabine para', resumo: 'Freio range ao parar', causa: 'Freio', peso: 3 },
-  { id: 'q7', titulo: 'A cabine balança ao parar no andar?', ajuda: 'Teste em pelo menos dois andares diferentes', resumo: 'Cabine balança ao parar', causa: 'Freio', peso: 2 },
-  { id: 'q8', titulo: 'A porta demora mais que o normal para fechar?', ajuda: 'Compare com o tempo habitual de fechamento', resumo: 'Porta lenta ao fechar', causa: 'Porta', peso: 2 },
-  { id: 'q9', titulo: 'O alarme sonoro dispara sem motivo aparente?', ajuda: 'Considere as últimas 48 horas de uso', resumo: 'Alarme dispara sozinho', causa: 'Sensor', peso: 3 },
-  { id: 'q10', titulo: 'O elevador reinicia ou trava sozinho?', ajuda: 'Painel apaga e volta, ou trava por alguns segundos', resumo: 'Reinicia ou trava sozinho', causa: 'Sensor', peso: 2 },
-  { id: 'q11', titulo: 'Sente cheiro de queimado na cabine ou casa de máquinas?', ajuda: 'Verifique com cautela, sem se aproximar do quadro elétrico', resumo: 'Cheiro de queimado', causa: 'Motor', peso: 3 },
-  { id: 'q12', titulo: 'A cabine para desnivelada em relação ao andar?', ajuda: 'Observe o degrau entre a cabine e o piso ao parar', resumo: 'Cabine desnivelada', causa: 'Freio', peso: 2 },
+  { id: 'P1', titulo: 'O elevador faz barulho metálico?', ajuda: 'Ouça durante a subida, com a cabine vazia', resumo: 'Barulho metálico', pesos: { Motor: 3, Freio: 1, Porta: 0, Sensor: 0, 'Polia/Cabo': 2, 'Contator Elétrico': 0 } },
+  { id: 'P2', titulo: 'O elevador para com solavancos?', ajuda: 'Perceba se a cabine treme ou dá um solavanco ao parar no andar', resumo: 'Para com solavancos', pesos: { Motor: 2, Freio: 3, Porta: 0, Sensor: 1, 'Polia/Cabo': 1, 'Contator Elétrico': 0 } },
+  { id: 'P3', titulo: 'A porta não abre ou trava?', ajuda: 'Teste no térreo e em mais um andar', resumo: 'Porta não abre ou trava', pesos: { Motor: 0, Freio: 0, Porta: 3, Sensor: 2, 'Polia/Cabo': 0, 'Contator Elétrico': 0 } },
+  { id: 'P4', titulo: 'A porta fecha muito devagar?', ajuda: 'Compare com o tempo habitual de fechamento', resumo: 'Porta lenta ao fechar', pesos: { Motor: 0, Freio: 0, Porta: 2, Sensor: 0, 'Polia/Cabo': 0, 'Contator Elétrico': 0 } },
+  { id: 'P5', titulo: 'Há cheiro de queimado?', ajuda: 'Verifique com cautela, sem se aproximar do quadro elétrico', resumo: 'Cheiro de queimado', pesos: { Motor: 1, Freio: 0, Porta: 0, Sensor: 0, 'Polia/Cabo': 0, 'Contator Elétrico': 3 } },
+  { id: 'P6', titulo: 'A luz da cabine oscila?', ajuda: 'Observe com a porta fechada, em movimento', resumo: 'Luz da cabine oscila', pesos: { Motor: 0, Freio: 0, Porta: 1, Sensor: 0, 'Polia/Cabo': 0, 'Contator Elétrico': 0 } },
+  { id: 'P7', titulo: 'O painel de andares apaga?', ajuda: 'Observe se os números do painel apagam ou piscam durante o percurso', resumo: 'Painel de andares apaga', pesos: { Motor: 0, Freio: 0, Porta: 0, Sensor: 3, 'Polia/Cabo': 0, 'Contator Elétrico': 0 } },
+  { id: 'P8', titulo: 'O elevador vibra na subida?', ajuda: 'Perceptível ao encostar na parede da cabine', resumo: 'Vibração na subida', pesos: { Motor: 1, Freio: 0, Porta: 0, Sensor: 0, 'Polia/Cabo': 0, 'Contator Elétrico': 0 } },
+  { id: 'P9', titulo: 'O freio faz ruído ao parar?', ajuda: 'Perceba no instante em que a cabine para', resumo: 'Freio faz ruído ao parar', pesos: { Motor: 0, Freio: 2, Porta: 0, Sensor: 0, 'Polia/Cabo': 0, 'Contator Elétrico': 0 } },
+  { id: 'P10', titulo: 'O cabo está desgastado?', ajuda: 'Verifique o cabo de tração na casa de máquinas, se tiver acesso', resumo: 'Cabo desgastado', pesos: { Motor: 0, Freio: 0, Porta: 0, Sensor: 0, 'Polia/Cabo': 2, 'Contator Elétrico': 0 } },
+  { id: 'P11', titulo: 'Há folga na polia?', ajuda: 'Observe se a polia balança ou tem folga perceptível', resumo: 'Folga na polia', pesos: { Motor: 0, Freio: 0, Porta: 0, Sensor: 0, 'Polia/Cabo': 1, 'Contator Elétrico': 0 } },
+  { id: 'P12', titulo: 'O disjuntor desarma?', ajuda: 'Considere quedas de energia repentinas do elevador nos últimos dias', resumo: 'Disjuntor desarma', pesos: { Motor: 0, Freio: 0, Porta: 0, Sensor: 0, 'Polia/Cabo': 0, 'Contator Elétrico': 3 } },
 ]
 
 export const TOTAL_PERGUNTAS_BANCO = perguntas.length
@@ -143,16 +146,33 @@ export const TOTAL_PERGUNTAS_BANCO = perguntas.length
 // Respostas padrão — usadas só quando a tela de Diagnóstico é
 // aberta diretamente, sem vir do fluxo de perguntas.
 export const RESPOSTAS_PADRAO = {
-  q1: 'sim', q2: 'sim', q3: 'nao', q4: 'sim', q5: 'nao-sei',
-  q6: 'nao', q7: 'nao', q8: 'nao', q9: 'nao-sei', q10: 'nao', q11: 'nao', q12: 'nao',
+  P1: 'sim', P2: 'sim', P3: 'nao', P4: 'sim', P5: 'nao-sei',
+  P6: 'nao', P7: 'nao', P8: 'nao', P9: 'nao-sei', P10: 'nao', P11: 'nao', P12: 'nao',
 }
 
-// ---------- Peça sugerida por causa ----------
+// ---------- Peças por falha (igual a PECAS_POR_FALHA em motor_simulacao.py) ----------
+// Lista de peças individuais por falha — é a fonte usada por sugerirPecas()
+// em src/utils/diagnostico.js para montar a lista certa por faixa de confiança.
+export const PECAS_POR_FALHA = {
+  Motor: ['Motor X34', 'Rolamento'],
+  Freio: ['Pastilha de Freio', 'Sensor de Desgaste'],
+  Porta: ['Atuador de Porta', 'Fechadura Elétrica'],
+  Sensor: ['Sensor de Porta', 'Sensor de Presença'],
+  'Polia/Cabo': ['Cabo de Aço', 'Polia', 'Lubrificante'],
+  'Contator Elétrico': ['Contator', 'Fusível', 'Relé'],
+}
+
+// Peça (só da falha principal) com metadados de estoque/serviço — usada na
+// caixa "Peça sugerida" das telas de diagnóstico. estoque/servico não existem
+// no motor Python, são só apresentação; o nome vem de PECAS_POR_FALHA para
+// nunca divergir da lista de peças de verdade.
 export const pecasPorCausa = {
-  Motor: { nome: 'Motor X34 + Rolamento', estoque: 'Em estoque', servico: '~2h de serviço' },
-  Freio: { nome: 'Pastilha de freio + Graxa MP2', estoque: 'Em estoque', servico: '~1h30 de serviço' },
-  Sensor: { nome: 'Sensor óptico + Placa de comando', estoque: 'Sob encomenda', servico: '~2h30 de serviço' },
-  Porta: { nome: 'Kit de trilho e sensor de porta', estoque: 'Em estoque', servico: '~1h de serviço' },
+  Motor: { nome: PECAS_POR_FALHA.Motor.join(' + '), estoque: 'Em estoque', servico: '~2h de serviço' },
+  Freio: { nome: PECAS_POR_FALHA.Freio.join(' + '), estoque: 'Em estoque', servico: '~1h30 de serviço' },
+  Porta: { nome: PECAS_POR_FALHA.Porta.join(' + '), estoque: 'Em estoque', servico: '~1h de serviço' },
+  Sensor: { nome: PECAS_POR_FALHA.Sensor.join(' + '), estoque: 'Sob encomenda', servico: '~2h30 de serviço' },
+  'Polia/Cabo': { nome: PECAS_POR_FALHA['Polia/Cabo'].join(' + '), estoque: 'Sob encomenda', servico: '~3h de serviço' },
+  'Contator Elétrico': { nome: PECAS_POR_FALHA['Contator Elétrico'].join(' + '), estoque: 'Em estoque', servico: '~1h30 de serviço' },
 }
 
 // ---------- Central OTIS ----------
@@ -254,7 +274,7 @@ export const riskScore = [
     tendencia: 'subindo', variacao: 6, sparkline: [40, 52, 58, 70, 82, 94],
     detalhe: {
       ultimaManutencao: '22/06/2026 · troca de cabos', custoEstimado: 'R$ 4.200 – R$ 5.600',
-      pecas: ['Motor X34', 'Rolamento', 'Placa de comando'],
+      pecas: ['Motor X34', 'Rolamento'],
       plano: ['Inspeção urgente', 'Substituir motor e rolamento', 'Reavaliar contrato de manutenção'],
       historico: [
         { data: '26/08', titulo: 'Barulho metálico na subida', status: 'aberto' },
@@ -284,7 +304,7 @@ export const riskScore = [
     tendencia: 'estavel', variacao: 0, sparkline: [80, 78, 82, 79, 83, 84],
     detalhe: {
       ultimaManutencao: '10/05/2026 · inspeção geral', custoEstimado: 'R$ 2.600 – R$ 3.800',
-      pecas: ['Sensor óptico', 'Placa de comando'],
+      pecas: ['Sensor de Porta', 'Sensor de Presença'],
       plano: ['Agendar retrofit', 'Revisar sensores de porta', 'Testar sistema de frenagem'],
       historico: [
         { data: '22/08', titulo: 'Pane elétrica', status: 'aberto' },
@@ -299,7 +319,7 @@ export const riskScore = [
     tendencia: 'subindo', variacao: 3, sparkline: [60, 64, 68, 71, 75, 79],
     detalhe: {
       ultimaManutencao: '02/04/2026 · lubrificação', custoEstimado: 'R$ 1.800 – R$ 2.900',
-      pecas: ['Pastilha de freio', 'Graxa MP2'],
+      pecas: ['Pastilha de Freio', 'Sensor de Desgaste'],
       plano: ['Agendar retrofit', 'Inspecionar sistema de freios', 'Monitorar por 30 dias'],
       historico: [
         { data: '19/08', titulo: 'Cabine balança ao parar', status: 'aberto' },
@@ -314,7 +334,7 @@ export const riskScore = [
     tendencia: 'descendo', variacao: -2, sparkline: [81, 79, 77, 75, 74, 73],
     detalhe: {
       ultimaManutencao: '02/03/2026 · troca de peça', custoEstimado: 'R$ 1.500 – R$ 2.400',
-      pecas: ['Cabos de aço', 'Roldanas'],
+      pecas: ['Motor X34', 'Rolamento'],
       plano: ['Trocar rolamento', 'Testar operação por 15 dias', 'Revisar contrato SLA'],
       historico: [
         { data: '26/08', titulo: 'Porta não abre no térreo', status: 'aberto' },
@@ -329,7 +349,7 @@ export const riskScore = [
     tendencia: 'subindo', variacao: 2, sparkline: [56, 59, 62, 65, 66, 68],
     detalhe: {
       ultimaManutencao: '14/02/2026 · revisão elétrica', custoEstimado: 'R$ 1.200 – R$ 2.000',
-      pecas: ['Sensor óptico'],
+      pecas: ['Sensor de Porta'],
       plano: ['Agendar retrofit', 'Avaliar upgrade IoT', 'Acompanhar chamados recorrentes'],
       historico: [
         { data: '18/08', titulo: 'Elevador reinicia sozinho', status: 'aberto' },
@@ -344,7 +364,7 @@ export const riskScore = [
     tendencia: 'estavel', variacao: 0, sparkline: [62, 65, 63, 64, 63, 64],
     detalhe: {
       ultimaManutencao: '08/01/2026 · inspeção', custoEstimado: 'R$ 900 – R$ 1.600',
-      pecas: ['Pastilha de freio'],
+      pecas: ['Pastilha de Freio'],
       plano: ['Antecipar preventiva', 'Confirmar troca de pastilha', 'Encerrar acompanhamento'],
       historico: [
         { data: '11/08', titulo: 'Ruído leve na descida', status: 'resolvido' },
@@ -358,7 +378,7 @@ export const riskScore = [
     tendencia: 'descendo', variacao: -3, sparkline: [68, 65, 62, 60, 59, 58],
     detalhe: {
       ultimaManutencao: '30/01/2026 · troca de óleo', custoEstimado: 'R$ 1.000 – R$ 1.800',
-      pecas: ['Graxa MP2', 'Cabo de aço'],
+      pecas: ['Cabo de Aço', 'Lubrificante'],
       plano: ['Antecipar preventiva', 'Confirmar peças em estoque', 'Reavaliar em 60 dias'],
       historico: [
         { data: '09/08', titulo: 'Vibração leve na subida', status: 'resolvido' },
@@ -372,7 +392,7 @@ export const riskScore = [
     tendencia: 'subindo', variacao: 1, sparkline: [46, 47, 48, 49, 50, 51],
     detalhe: {
       ultimaManutencao: '19/12/2025 · lubrificação', custoEstimado: 'R$ 800 – R$ 1.400',
-      pecas: ['Cabo de aço'],
+      pecas: ['Cabo de Aço'],
       plano: ['Monitorar', 'Agendar inspeção de rotina', 'Confirmar contrato SLA'],
       historico: [
         { data: '05/08', titulo: 'Botão sem resposta', status: 'resolvido' },
@@ -468,10 +488,10 @@ export const chamadosUrgentes = [
     distancia: '0,8 km',
     sla: 'SLA 4h',
     causas: [
-      { nome: 'Motor', probabilidade: 78 },
-      { nome: 'Freio', probabilidade: 14 },
+      { nome: 'Motor', confianca: 78 },
+      { nome: 'Freio', confianca: 14 },
     ],
-    pecas: ['Motor X34', 'Rolamento'],
+    pecas: ['Motor X34', 'Rolamento', 'Pastilha de Freio', 'Sensor de Desgaste'],
     nota: 'Barulho metálico e paradas entre andares. Preventiva atrasada em 3 meses — leve peças de rolamento.',
     abertoEm: '08:14',
     tecnicoId: 'u-03',
@@ -488,10 +508,10 @@ export const chamadosUrgentes = [
     distancia: '1,3 km',
     sla: 'SLA 8h',
     causas: [
-      { nome: 'Freio', probabilidade: 65 },
-      { nome: 'Sensor', probabilidade: 22 },
+      { nome: 'Freio', confianca: 65 },
+      { nome: 'Sensor', confianca: 22 },
     ],
-    pecas: ['Pastilha de freio', 'Graxa MP2'],
+    pecas: ['Pastilha de Freio', 'Sensor de Desgaste', 'Sensor de Porta', 'Sensor de Presença'],
     nota: 'Porta não abre no térreo. Histórico de 6 chamados em 12 meses — considere inspeção completa.',
     abertoEm: '17:40',
     tecnicoId: 'u-03',
@@ -502,17 +522,17 @@ export const chamadosUrgentes = [
     id: 'ch-03',
     local: 'Aurora · Elevador 3',
     rg: 'ES-3305',
-    causa: 'Sensor de porta',
+    causa: 'Sensor',
     confianca: 54,
     urgencia: 'Média',
     distancia: '2,7 km',
     sla: 'SLA 8h',
     causas: [
-      { nome: 'Sensor de porta', probabilidade: 54 },
-      { nome: 'Placa de comando', probabilidade: 31 },
+      { nome: 'Sensor', confianca: 54 },
+      { nome: 'Porta', confianca: 31 },
     ],
-    pecas: ['Sensor óptico', 'Kit completo'],
-    nota: 'Diagnóstico inconclusivo — leve o kit completo. Elevador sem retrofit, sem telemetria disponível.',
+    pecas: ['Sensor de Porta', 'Sensor de Presença', 'Atuador de Porta', 'Fechadura Elétrica'],
+    nota: 'Diagnóstico em dúvida — leve peças de sensor e de porta para cobrir as duas hipóteses. Elevador sem retrofit, sem telemetria disponível.',
     abertoEm: '14:10',
     tecnicoId: 'u-04',
     tecnicoNome: 'Bruno Alves',
@@ -527,4 +547,4 @@ export const preventivas = [
   { dia: '29', mes: 'SET', titulo: 'Teste de freio', local: 'Solar · ES-2210', hora: '10:00', duracao: '~1h' },
 ]
 
-export const pecasDisponiveis = ['Rolamento', 'Graxa MP2', 'Motor X34', 'Sensor óptico', 'Pastilha de freio', 'Cabo de aço']
+export const pecasDisponiveis = ['Rolamento', 'Lubrificante', 'Motor X34', 'Sensor de Porta', 'Pastilha de Freio', 'Cabo de Aço']

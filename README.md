@@ -14,8 +14,11 @@ antes mesmo do técnico chegar ao local.
 ## Como funciona o diagnóstico
 
 O motor de diagnóstico **não usa inteligência artificial nem estatística** — é
-uma matriz de pesos e um sistema de pontuação por soma e subtração, calculado
-em Python puro (`motor_simulacao.py`).
+uma matriz de pesos e um sistema de pontuação por soma e subtração. A conta é
+definida em Python puro (`motor_simulacao.py`, a referência) e reproduzida em
+JavaScript (`src/utils/diagnostico.js`), que é o que roda de fato na tela do
+síndico e da Central — os dois lados usam a mesma matriz de pesos, a mesma
+regra de "sim"/"não"/"não sei" e os mesmos limiares de classificação.
 
 - Existem **12 perguntas** (P1 a P12) e **6 possíveis falhas** (Motor, Freio,
   Porta, Sensor, Polia/Cabo, Contator Elétrico).
@@ -30,7 +33,11 @@ em Python puro (`motor_simulacao.py`).
   viram 0) e divide-se pela soma de todas as pontuações positivas.
 - **Parada antecipada:** assim que alguma falha atinge 80% de confiança ou
   mais, o motor para de perguntar — não faz sentido continuar o questionário
-  se a causa já está clara.
+  se a causa já está clara. Isso não é só um comportamento da simulação em
+  Python: o fluxo de perguntas do síndico e da Central (`/chamados/novo`)
+  recalcula a confiança depois de cada resposta e encerra o questionário na
+  hora se o limite for atingido, levando o usuário direto para a tela de
+  diagnóstico mesmo que ainda faltem perguntas no banco.
 - Se as 12 perguntas terminarem sem isso acontecer, o diagnóstico é
   classificado pela maior confiança encontrada:
 
@@ -57,7 +64,8 @@ em Python puro (`motor_simulacao.py`).
 | Camada | Tecnologia |
 |---|---|
 | Front-end | React 18 + Vite, React Router, Tailwind CSS |
-| Motor de diagnóstico | Python puro (`motor_simulacao.py`) — sem bibliotecas externas |
+| Motor de diagnóstico (referência) | Python puro (`motor_simulacao.py`) — sem bibliotecas externas |
+| Motor de diagnóstico (front-end) | JavaScript puro (`src/utils/diagnostico.js`) — mesma matriz de pesos e limiares do Python, é o que roda de fato nas telas |
 | Back-end | Flask (`app.py`) — mínimo e apenas demonstrativo |
 | Persistência | Arquivo `database.json` (JSON puro) |
 
@@ -102,7 +110,11 @@ python motor_simulacao.py
 ```
 
 Roda três cenários de teste no terminal (Certeza, Provável e Incerteza), cada
-um mostrando as respostas, a pontuação, a confiança e o diagnóstico final.
+um mostrando as respostas, a pontuação, a confiança e o diagnóstico final —
+inclusive quando a parada antecipada dispara. É a mesma conta que
+`src/utils/diagnostico.js` reproduz no navegador; os dois lados foram
+conferidos batendo número a número, incluindo o ponto exato em que a parada
+antecipada dispara.
 
 ## Marca
 
@@ -135,7 +147,7 @@ Seletor de perfil para navegar direto em cada fluxo da demo.
 | `/sindico` | Meus elevadores — cards de status + últimos chamados |
 | `/sindico/elevadores/:rg` | Detalhe do elevador — ficha, histórico e preventivas |
 | `/sindico/chamados` | Lista de chamados com filtro |
-| `/sindico/chamados/novo` | Fluxo de 12 perguntas (entrada estruturada) |
+| `/sindico/chamados/novo` | Fluxo de perguntas com parada antecipada (até 12, entrada estruturada) |
 | `/sindico/chamados/novo/diagnostico` | Diagnóstico com explicação das respostas |
 | `/sindico/relatorios` | Relatórios do condomínio |
 
@@ -145,7 +157,7 @@ Seletor de perfil para navegar direto em cada fluxo da demo.
 | `/central` | Painel — indicadores, chamados recentes e prioridade da carteira |
 | `/central/elevadores` | Visão por elevador — árvore condomínio → bloco → elevador |
 | `/central/chamados` | Chamados abertos com diagnóstico do motor |
-| `/central/chamados/novo` | Abrir chamado — mesmo fluxo de 12 perguntas do síndico |
+| `/central/chamados/novo` | Abrir chamado — mesmo fluxo de perguntas com parada antecipada do síndico |
 | `/central/chamados/novo/atribuir` | Atribuir um técnico ao chamado recém-aberto |
 | `/central/risk-score` | Risk Score com filtros e faixas de risco |
 | `/central/equipe` | Técnicos em campo |

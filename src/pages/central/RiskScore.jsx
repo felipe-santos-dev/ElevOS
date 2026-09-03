@@ -267,10 +267,7 @@ export default function RiskScore() {
                         <td className="px-3 py-3.5 text-[13px] text-ink-700">{r.condominio}</td>
                         <td className="px-3 py-3.5 text-[13px] text-ink-700">{r.idade} anos</td>
                         <td className="px-3 py-3.5">
-                          <span className="flex items-center gap-3">
-                            <span className="w-6 shrink-0 text-[17px] font-extrabold tabular-nums">{r.score}</span>
-                            <Sparkline values={r.sparkline} color={tone.hex} />
-                          </span>
+                          <span className="text-[17px] font-extrabold tabular-nums">{r.score}</span>
                         </td>
                         <td className="px-3 py-3.5">
                           <TrendChip tendencia={r.tendencia} variacao={r.variacao} />

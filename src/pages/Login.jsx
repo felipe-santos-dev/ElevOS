@@ -46,7 +46,7 @@ export default function Login() {
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-slate-400">
             Síndicos abrem chamados em doze perguntas. A Central recebe o diagnóstico já explicado,
-            com a probabilidade de cada causa.
+            com a pontuação de cada causa.
           </p>
         </div>
 

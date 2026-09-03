@@ -39,8 +39,8 @@ export function StatusLine({ status, label }) {
   )
 }
 
-// ---------- Barra de probabilidade ----------
-export function ProbBar({ value, tone = 'otis', delay = 0 }) {
+// ---------- Barra de confiança ----------
+export function ConfiancaBar({ value, tone = 'otis', delay = 0 }) {
   const [w, setW] = useState(0)
   useEffect(() => {
     const t = setTimeout(() => setW(value), 80 + delay)

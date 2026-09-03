@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { NivelBadge, ProbBar, Toast } from '../../components/UI'
+import { ConfiancaBar, NivelBadge, Toast } from '../../components/UI'
 import { LogoMark } from '../../components/Logo'
 import { IconBox, IconCheck, IconCheckCircle, IconInfo, IconX } from '../../components/Icons'
-import { pecasPorCausa, perguntas, RESPOSTAS_PADRAO } from '../../data/mock'
-import { calcularDiagnostico, explicarDiagnostico, nivelConfianca } from '../../utils/diagnostico'
+import { PECAS_POR_FALHA, pecasPorCausa, perguntas, RESPOSTAS_PADRAO } from '../../data/mock'
+import { calcularDiagnostico, explicarDiagnostico, nivelConfianca, sugerirPecas } from '../../utils/diagnostico'
 import { buscarElevador } from '../../utils/elevadores'
 import { useChamados } from '../../state/ChamadosContext'
 
@@ -36,6 +36,7 @@ export default function Diagnostico({ origem = 'sindico' }) {
   const nivel = nivelConfianca(diagnostico.confianca)
   const causaTop = diagnostico.causas[0]
   const peca = pecasPorCausa[causaTop?.nome] ?? pecasPorCausa.Motor
+  const pecasSugeridas = useMemo(() => sugerirPecas(diagnostico, nivel, PECAS_POR_FALHA), [diagnostico, nivel])
 
   const explicacao = useMemo(() => explicarDiagnostico(diagnostico, nivel), [diagnostico, nivel])
 
@@ -52,7 +53,7 @@ export default function Diagnostico({ origem = 'sindico' }) {
       causa: causaTop?.nome,
       confianca: diagnostico.confianca,
       causas: diagnostico.causas,
-      pecas: [peca.nome],
+      pecas: pecasSugeridas,
       nota: explicacao,
       origem: 'sindico',
     })
@@ -103,15 +104,15 @@ export default function Diagnostico({ origem = 'sindico' }) {
               </div>
             </section>
 
-            {/* Probabilidades */}
+            {/* Confiança por causa */}
             <section className="card animate-fade-up p-5" style={{ animationDelay: '80ms' }}>
-              <h2 className="text-[15px] font-bold">Probabilidades por causa</h2>
+              <h2 className="text-[15px] font-bold">Confiança por causa</h2>
               <ul className="mt-4 space-y-3.5">
                 {diagnostico.causas.map((c, i) => (
                   <li key={c.nome} className="grid grid-cols-[72px_1fr_44px] items-center gap-3 sm:grid-cols-[88px_1fr_48px]">
                     <span className="truncate text-[13px] font-medium">{c.nome}</span>
-                    <ProbBar value={c.probabilidade} tone={tons[i] ?? 'faint'} delay={i * 120} />
-                    <span className="text-right text-[13px] font-bold tabular-nums">{c.probabilidade}%</span>
+                    <ConfiancaBar value={c.confianca} tone={tons[i] ?? 'faint'} delay={i * 120} />
+                    <span className="text-right text-[13px] font-bold tabular-nums">{c.confianca}%</span>
                   </li>
                 ))}
               </ul>
@@ -133,10 +134,10 @@ export default function Diagnostico({ origem = 'sindico' }) {
           {/* Coluna direita */}
           <div className="space-y-4">
             <section className="card animate-fade-up p-5" style={{ animationDelay: '60ms' }}>
-              <p className="text-[13px] text-ink-500">Peça sugerida</p>
+              <p className="text-[13px] text-ink-500">{pecasSugeridas.length > 1 ? 'Peças sugeridas' : 'Peça sugerida'}</p>
               <p className="mt-2 flex items-center gap-2.5 text-[17px] font-bold">
                 <IconBox className="w-5 h-5 shrink-0 text-ink-500" />
-                {peca.nome}
+                {pecasSugeridas.join(', ')}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">

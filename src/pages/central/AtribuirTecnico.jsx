@@ -3,8 +3,8 @@ import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } 
 import { NivelBadge, Toast } from '../../components/UI'
 import { LogoMark } from '../../components/Logo'
 import { IconCheck, IconCheckCircle, IconChevronLeft } from '../../components/Icons'
-import { RESPOSTAS_PADRAO, pecasPorCausa, perguntas, tecnicos } from '../../data/mock'
-import { calcularDiagnostico, explicarDiagnostico, nivelConfianca } from '../../utils/diagnostico'
+import { PECAS_POR_FALHA, RESPOSTAS_PADRAO, perguntas, tecnicos } from '../../data/mock'
+import { calcularDiagnostico, explicarDiagnostico, nivelConfianca, sugerirPecas } from '../../utils/diagnostico'
 import { buscarElevador } from '../../utils/elevadores'
 import { useChamados } from '../../state/ChamadosContext'
 
@@ -38,7 +38,7 @@ export default function AtribuirTecnico() {
     : diagnosticoCalculado
   const nivel = nivelConfianca(diagnostico.confianca)
   const causaTop = diagnostico.causas[0]
-  const peca = pecasPorCausa[causaTop?.nome] ?? pecasPorCausa.Motor
+  const pecasSugeridas = useMemo(() => sugerirPecas(diagnostico, nivel, PECAS_POR_FALHA), [diagnostico, nivel])
   const explicacao = useMemo(() => explicarDiagnostico(diagnosticoCalculado, nivelConfianca(diagnosticoCalculado.confianca)), [diagnosticoCalculado])
 
   const cargaPorTecnico = useMemo(() => {
@@ -73,7 +73,7 @@ export default function AtribuirTecnico() {
         causa: causaTop?.nome,
         confianca: diagnostico.confianca,
         causas: diagnostico.causas,
-        pecas: [peca.nome],
+        pecas: pecasSugeridas,
         nota: explicacao,
         tecnicoId: tecnico.id,
         tecnicoNome: tecnico.nome,
@@ -121,7 +121,7 @@ export default function AtribuirTecnico() {
             </div>
             <p className="mt-2 text-[13px] leading-relaxed text-ink-700">
               {causaTop && diagnostico.confianca !== null
-                ? `Causa mais provável: ${causaTop.nome} (${causaTop.probabilidade}%).`
+                ? `Causa mais provável: ${causaTop.nome} (${causaTop.confianca}%).`
                 : 'Sem sintomas conclusivos — avaliação no local será necessária.'}
             </p>
             {modoAceitar && chamadoExistente.nota && (
