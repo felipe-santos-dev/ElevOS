@@ -1,203 +1,221 @@
 # ElevOS
 
-Sistema de apoio ao diagnóstico de falhas em elevadores sem telemetria (sem IoT).
-Projeto acadêmico do **2º semestre da FIAP** · Challenge OTIS · Grupo GLYFFS.
+Sistema de apoio ao diagnóstico de falhas em elevadores sem telemetria.
+Projeto acadêmico do 2º semestre da FIAP · Challenge OTIS · Grupo GLYFFS.
+
+**Demonstração:** https://grupo-glyffs.github.io/ElevOS/
+
+A versão publicada é o front-end completo, com dados de exemplo. O back-end e o
+motor em Python não rodam no GitHub Pages, que serve apenas arquivos estáticos —
+para executá-los, veja [Rodando o lado Python](#rodando-o-lado-python).
+
+---
 
 ## O problema
 
-Muitos elevadores mais antigos não têm nenhum sensor conectado — quando algo dá
-errado, o único jeito de saber o que houve é o síndico descrever o sintoma. O
-ElevOS estrutura essa descrição em um formulário de perguntas de sim/não e usa
-essas respostas para apontar a causa mais provável e as peças recomendadas,
-antes mesmo do técnico chegar ao local.
+Elevadores mais antigos não têm sensor conectado. Quando algo dá errado, a única
+fonte de informação é o síndico descrevendo o sintoma com as palavras dele — e
+isso chega à central como "está fazendo um barulho estranho".
+
+O ElevOS troca esse texto livre por um questionário objetivo e usa as respostas
+para apontar a causa mais provável e as peças recomendadas, antes de o técnico
+sair para o local.
 
 ## Como funciona o diagnóstico
 
-O motor de diagnóstico **não usa inteligência artificial nem estatística** — é
-uma matriz de pesos e um sistema de pontuação por soma e subtração. A conta é
-definida em Python puro (`motor_simulacao.py`, a referência) e reproduzida em
-JavaScript (`src/utils/diagnostico.js`), que é o que roda de fato na tela do
-síndico e da Central — os dois lados usam a mesma matriz de pesos, a mesma
-regra de "sim"/"não"/"não sei" e os mesmos limiares de classificação.
+O motor **não usa inteligência artificial nem estatística**. É uma matriz de
+pesos com soma e subtração, e qualquer resultado pode ser refeito no papel.
 
-- Existem **12 perguntas** (P1 a P12) e **6 possíveis falhas** (Motor, Freio,
-  Porta, Sensor, Polia/Cabo, Contator Elétrico).
-- Cada pergunta tem um peso (de 0 a 3) para cada falha, definido à mão pela
-  equipe a partir do conhecimento sobre os sintomas de cada problema.
-- Cada resposta ajusta a pontuação de cada falha:
-  - **"Sim"** soma o peso da pergunta.
-  - **"Não"** subtrai o peso da pergunta.
-  - **"Não sei"** não altera nada.
-- Depois de cada resposta, a pontuação é transformada em uma **porcentagem de
-  confiança**: pega-se a pontuação de cada falha (ignorando as negativas, que
-  viram 0) e divide-se pela soma de todas as pontuações positivas.
-- **Parada antecipada:** assim que alguma falha atinge 80% de confiança ou
-  mais, o motor para de perguntar — não faz sentido continuar o questionário
-  se a causa já está clara. Isso não é só um comportamento da simulação em
-  Python: o fluxo de perguntas do síndico e da Central (`/chamados/novo`)
-  recalcula a confiança depois de cada resposta e encerra o questionário na
-  hora se o limite for atingido, levando o usuário direto para a tela de
-  diagnóstico mesmo que ainda faltem perguntas no banco.
-- Se as 12 perguntas terminarem sem isso acontecer, o diagnóstico é
-  classificado pela maior confiança encontrada:
+A conta é definida em Python puro (`motor_simulacao.py`, a referência) e
+reproduzida em JavaScript (`src/utils/diagnostico.js`), que é o que roda nas
+telas. Os dois lados usam a mesma matriz, a mesma regra de resposta e os mesmos
+limiares.
 
-  | Confiança | Classificação | O que o sistema sugere |
-  |---|---|---|
-  | 80% ou mais | **Certeza** | peça da falha principal |
-  | 65% a 79% | **Provável** | peças da falha principal + secundária |
-  | 40% a 64% | **Dúvida** | 3 a 4 peças possíveis |
-  | Menos de 40% | **Incerteza** | kit completo de peças |
+**A matriz.** São 12 perguntas (P1 a P12) e 6 falhas possíveis: Motor, Freio,
+Porta, Sensor, Polia/Cabo e Contator Elétrico. Cada pergunta tem um peso de 0 a
+3 para cada falha, definido pela equipe a partir dos sintomas típicos de cada
+problema.
+
+**A pontuação.** Cada resposta ajusta a pontuação de todas as falhas ao mesmo
+tempo:
+
+| Resposta | Efeito |
+|---|---|
+| Sim | soma o peso da pergunta |
+| Não | subtrai o peso da pergunta |
+| Não sei | não altera nada |
+
+O "não" subtrair é o que permite eliminar hipóteses: negar um sintoma derruba a
+pontuação das falhas que dependiam dele.
+
+**A confiança.** Depois de cada resposta, a pontuação vira porcentagem. As
+pontuações negativas são zeradas, somam-se as positivas, e cada falha fica com a
+sua fatia desse total.
+
+**Parada antecipada.** Assim que uma falha atinge 80% de confiança, o
+questionário encerra. Isso vale no fluxo real: `/chamados/novo` recalcula a cada
+resposta e leva direto para o diagnóstico, mesmo que ainda faltem perguntas.
+
+**Classificação.** Se as 12 perguntas terminarem sem atingir os 80%, a maior
+confiança define o resultado:
+
+| Confiança | Classificação | Peças sugeridas |
+|---|---|---|
+| 80% ou mais | Certeza | da falha principal |
+| 65% a 79% | Provável | da principal e da secundária |
+| 40% a 64% | Dúvida | 3 a 4 peças possíveis |
+| Menos de 40% | Incerteza | kit completo |
+
+A faixa de Incerteza existe de propósito: quando a evidência é fraca, o sistema
+assume que não sabe em vez de apostar em um palpite. Um diagnóstico errado com
+aparência de certeza manda o técnico com a peça errada.
 
 ## Os três perfis
 
-- **Síndico** — abre um chamado respondendo as 12 perguntas e acompanha o
-  diagnóstico e o andamento do atendimento.
-- **Central OTIS** — enxerga todos os chamados e elevadores monitorados, pode
-  abrir um chamado ela mesma (mesmo questionário de 12 perguntas) e atribuir
-  um técnico responsável.
-- **Técnico** — só vê os chamados atribuídos a ele, confirma que está saindo
-  para o atendimento e, ao final, registra o feedback (o chamado só se
-  encerra depois desse registro).
+**Síndico** — abre o chamado respondendo as perguntas, recebe o diagnóstico com
+a explicação de quais respostas pesaram e acompanha o andamento.
 
-## Tecnologias
+**Central OTIS** — enxerga todos os chamados e elevadores, pode abrir chamado
+pelo mesmo questionário e atribui o técnico responsável.
 
-| Camada | Tecnologia |
+**Técnico** — vê apenas os chamados atribuídos a ele, confirma que está saindo e
+registra o feedback ao final. O chamado só encerra depois desse registro.
+
+## Escopo e limitações
+
+Projeto acadêmico com restrição de escopo: só é usado o que foi ensinado no
+semestre. Vale explicitar o que isso significa.
+
+| | |
 |---|---|
 | Front-end | React 18 + Vite, React Router, Tailwind CSS |
-| Motor de diagnóstico (referência) | Python puro (`motor_simulacao.py`) — sem bibliotecas externas |
-| Motor de diagnóstico (front-end) | JavaScript puro (`src/utils/diagnostico.js`) — mesma matriz de pesos e limiares do Python, é o que roda de fato nas telas |
-| Back-end | Flask (`app.py`) — mínimo e apenas demonstrativo |
-| Persistência | Arquivo `database.json` (JSON puro) |
+| Motor (referência) | Python puro — `motor_simulacao.py`, só biblioteca padrão |
+| Motor (front-end) | JavaScript puro — `src/utils/diagnostico.js` |
+| Back-end | Flask — `app.py`, mínimo e demonstrativo |
+| Estado | Context API, sem biblioteca externa |
+| Ícones | SVG desenhados à mão em `src/components/Icons.jsx` |
 
-Ícones são todos SVG desenhados à mão em `src/components/Icons.jsx` — nenhuma
-biblioteca de ícones ou de componentes de interface prontos foi usada.
+Nenhuma biblioteca de componentes de interface, de ícones, de gerenciamento de
+estado ou de cálculo foi usada.
 
-**Importante:** o front-end funciona sozinho, com dados de exemplo em
-`src/data/mock.js` — ele **não** faz chamadas para o `app.py`. O back-end
-existe só para mostrar que o mesmo motor de diagnóstico também funciona por
-trás de uma API HTTP, com 3 rotas simples (ver abaixo).
+O que o projeto **não** faz, e é bom deixar claro:
 
-## Como rodar
+- O front-end não conversa com o `app.py`. Ele funciona sozinho com os dados de
+  `src/data/mock.js`. O back-end existe para demonstrar que o mesmo motor
+  responde por HTTP.
+- Não há persistência. O `database.json` é lido pela rota `/api/chamados` e
+  nunca escrito; o que é criado nas telas vive em memória e se perde no reload.
+- O login é um seletor de perfil, sem autenticação.
+- Não há sensor, telemetria nem hardware. É proposital: a proposta é atender
+  justamente o elevador que não tem sensor.
 
-### Front-end
+## Rodando o lado Python
+
+O GitHub Pages não executa código de servidor, então essas duas partes só rodam
+localmente.
 
 ```bash
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # gera dist/
-npm run preview  # serve o build
+pip install -r requirements.txt
+python app.py            # http://localhost:5000
 ```
-
-### Back-end (demonstrativo)
-
-```bash
-pip install flask flask-cors
-python app.py    # http://localhost:5000
-```
-
-Rotas disponíveis:
 
 | Rota | Método | O que faz |
 |---|---|---|
-| `/api/health` | GET | Confirma que o servidor está rodando |
-| `/api/diagnosticar` | POST | Recebe `{"respostas": {"P1": "Sim", ...}}` e devolve o diagnóstico completo |
-| `/api/chamados` | GET | Devolve a lista de chamados salva em `database.json` |
+| `/api/health` | GET | Confirma que o servidor está no ar |
+| `/api/diagnosticar` | POST | Recebe `{"respostas": {"P1": "Sim", ...}}` e devolve o diagnóstico |
+| `/api/chamados` | GET | Devolve os chamados de `database.json` |
 
-### Motor de diagnóstico isolado
+Para ver a conta sem subir nada:
 
 ```bash
 python motor_simulacao.py
 ```
 
-Roda três cenários de teste no terminal (Certeza, Provável e Incerteza), cada
-um mostrando as respostas, a pontuação, a confiança e o diagnóstico final —
-inclusive quando a parada antecipada dispara. É a mesma conta que
-`src/utils/diagnostico.js` reproduz no navegador; os dois lados foram
-conferidos batendo número a número, incluindo o ponto exato em que a parada
-antecipada dispara.
+Roda três cenários no terminal — Certeza, Provável e Incerteza — mostrando as
+respostas, a pontuação, a confiança e o ponto em que a parada antecipada
+dispara. É a mesma conta que o JavaScript reproduz no navegador; os dois lados
+foram conferidos número a número.
+
+## Telas
+
+**Login (`/`)** — seletor de perfil para navegar em cada fluxo.
+
+### Síndico
+
+| Rota | Tela |
+|---|---|
+| `/sindico` | Meus elevadores — cards de status e últimos chamados |
+| `/sindico/elevadores/:rg` | Ficha do elevador, histórico e preventivas |
+| `/sindico/chamados` | Lista de chamados com filtro |
+| `/sindico/chamados/novo` | Questionário, com parada antecipada |
+| `/sindico/chamados/novo/diagnostico` | Diagnóstico e explicação das respostas |
+| `/sindico/relatorios` | Relatórios do condomínio |
+
+### Central OTIS
+
+| Rota | Tela |
+|---|---|
+| `/central` | Painel — indicadores, chamados recentes e prioridade da carteira |
+| `/central/elevadores` | Árvore condomínio → bloco → elevador |
+| `/central/chamados` | Chamados abertos com o diagnóstico do motor |
+| `/central/chamados/novo` | Abrir chamado pelo mesmo questionário |
+| `/central/chamados/novo/atribuir` | Atribuir técnico ao chamado |
+| `/central/risk-score` | Risk Score com filtros e faixas |
+| `/central/equipe` | Técnicos em campo e carga de trabalho |
+
+O seletor de cidade no cabeçalho é global: filtra condomínios, elevadores, Risk
+Score e indicadores em todas as telas da Central.
+
+### Técnico
+
+| Rota | Tela |
+|---|---|
+| `/tecnico` | Agenda — abas Urgentes e Preventivas |
+| `/tecnico/chamados/:id` | Diagnóstico, peças sugeridas e confirmação de saída |
+| `/tecnico/chamados/:id/finalizar` | Feedback: resultado, avaliação e peças usadas |
+
+É o único perfil que trabalha em campo, então as telas são mobile-first. No
+desktop aparecem dentro de uma moldura de celular (`TecnicoShell.jsx`). Não
+existe "aceitar chamado", só confirmar a saída — o atendimento se encerra quando
+o feedback é salvo.
+
+## Responsividade
+
+Verificado em 390px, 820px e 1440px, sem rolagem horizontal. As tabelas da
+Central viram cards no mobile e as barras laterais viram menu retrátil.
 
 ## Marca
 
-A logo vive em `src/components/Logo.jsx`, em SVG — escala sem perder nitidez e serve
-também de favicon (data URI em `index.html`).
+A logo está em `src/components/Logo.jsx`, em SVG, e serve também de favicon
+(data URI no `index.html`).
 
 | Cor | Hex | Uso |
 |---|---|---|
 | Ciano ElevOS | `#039ABC` | símbolo, régua do slogan |
-| Navy do chevron | `#090D19` | chevrons, fundo do hero do login |
-| Azul de interface | `#0a2d8f` (`otis-900`) | botões e links |
+| Navy | `#090D19` | chevrons, fundo do login |
+| Azul de interface | `#0a2d8f` | botões e links |
 
 ```jsx
-<LogoMark />          // só o símbolo
-<Logo />              // símbolo + "ElevOS"           → usado nas telas
-<Logo tagline />      // símbolo + "ElevOS" + slogan  → usado só no login
+<LogoMark />      // só o símbolo
+<Logo />          // símbolo + wordmark — telas internas
+<Logo tagline />  // + slogan "Do registro à prevenção" — só no login
 ```
-
-O slogan "Do registro à prevenção" aparece **apenas no login**. Nas telas internas
-a marca fica reduzida ao símbolo + wordmark, para não competir com o conteúdo.
-
-## Telas
-
-### Login (`/`)
-Seletor de perfil para navegar direto em cada fluxo da demo.
-
-### Síndico
-| Rota | Tela |
-|---|---|
-| `/sindico` | Meus elevadores — cards de status + últimos chamados |
-| `/sindico/elevadores/:rg` | Detalhe do elevador — ficha, histórico e preventivas |
-| `/sindico/chamados` | Lista de chamados com filtro |
-| `/sindico/chamados/novo` | Fluxo de perguntas com parada antecipada (até 12, entrada estruturada) |
-| `/sindico/chamados/novo/diagnostico` | Diagnóstico com explicação das respostas |
-| `/sindico/relatorios` | Relatórios do condomínio |
-
-### Central OTIS
-| Rota | Tela |
-|---|---|
-| `/central` | Painel — indicadores, chamados recentes e prioridade da carteira |
-| `/central/elevadores` | Visão por elevador — árvore condomínio → bloco → elevador |
-| `/central/chamados` | Chamados abertos com diagnóstico do motor |
-| `/central/chamados/novo` | Abrir chamado — mesmo fluxo de perguntas com parada antecipada do síndico |
-| `/central/chamados/novo/atribuir` | Atribuir um técnico ao chamado recém-aberto |
-| `/central/risk-score` | Risk Score com filtros e faixas de risco |
-| `/central/equipe` | Técnicos em campo |
-
-O **seletor de cidade/região no header é global**: filtra condomínios, elevadores,
-Risk Score e indicadores de todas as telas da Central.
-
-### Técnico (mobile)
-| Rota | Tela |
-|---|---|
-| `/tecnico` | Agenda — abas Urgentes e Preventivas (só chamados atribuídos a ele) |
-| `/tecnico/chamados/:id` | Diagnóstico, peças sugeridas e confirmação de saída |
-| `/tecnico/chamados/:id/finalizar` | Feedback: resultado, avaliação do diagnóstico e peças usadas |
-
-O app do técnico é mobile-first. No desktop ele aparece dentro de uma moldura de celular
-(`src/components/TecnicoShell.jsx`) porque é o único perfil que trabalha em campo. Ele não
-tem opção de "aceitar" chamado — só de confirmar que está saindo; o atendimento só é
-considerado concluído depois que o feedback é salvo.
-
-## Responsividade
-
-Todas as telas foram verificadas em 390px (celular), 820px (tablet) e 1440px (desktop),
-sem overflow horizontal. As tabelas da Central viram cards no mobile; as sidebars viram
-drawer com botão de menu.
 
 ## Estrutura
 
 ```
-app.py                # back-end Flask mínimo (demonstrativo)
-database.json         # chamados de exemplo, para a rota /api/chamados
-motor_simulacao.py     # motor de diagnóstico em Python puro
+app.py                  back-end Flask demonstrativo
+motor_simulacao.py      motor de diagnóstico em Python — a referência
+database.json           chamados de exemplo para /api/chamados
+requirements.txt        flask e flask-cors
 src/
-├── components/        # layouts, primitivos de UI e ícones
-├── data/mock.js        # todos os dados usados pelo front-end
-├── state/              # estado compartilhado dos chamados (Context API)
-├── utils/               # cálculo do diagnóstico e busca de elevadores
+├── components/         layouts, primitivos de interface e ícones
+├── data/mock.js        matriz de pesos e dados de exemplo
+├── state/              estado compartilhado dos chamados (Context API)
+├── utils/              cálculo do diagnóstico e busca de elevadores
 ├── pages/
 │   ├── sindico/
 │   ├── central/
 │   └── tecnico/
-├── App.jsx              # rotas
+├── App.jsx             rotas
 └── main.jsx
-```
