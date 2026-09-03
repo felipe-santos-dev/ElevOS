@@ -3,7 +3,7 @@
 Sistema de apoio ao diagnóstico de falhas em elevadores sem telemetria.
 Projeto acadêmico do 2º semestre da FIAP · Challenge OTIS · Grupo GLYFFS.
 
-**Demonstração:** https://grupo-glyffs.github.io/ElevOS/
+**Demonstração:** https://felipe-santos-dev.github.io/ElevOS/
 
 A versão publicada é o front-end completo, com dados de exemplo. O back-end e o
 motor em Python não rodam no GitHub Pages, que serve apenas arquivos estáticos —
