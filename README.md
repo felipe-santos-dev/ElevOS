@@ -5,9 +5,10 @@ Projeto acadêmico do 2º semestre da FIAP · Challenge OTIS · Grupo GLYFFS.
 
 **Demonstração:** https://grupo-glyffs.github.io/ElevOS/
 
-A versão publicada é o front-end completo, com dados de exemplo. O back-end e o
-motor em Python não rodam no GitHub Pages, que serve apenas arquivos estáticos —
-para executá-los, veja [Rodando o lado Python](#rodando-o-lado-python).
+A versão publicada é o front-end completo, com dados de exemplo. O motor de
+referência em Python não roda no GitHub Pages, que serve apenas arquivos
+estáticos — para executá-lo, veja
+[Rodando o motor em Python](#rodando-o-motor-em-python).
 
 ---
 
@@ -91,7 +92,6 @@ semestre. Vale explicitar o que isso significa.
 | Front-end | React 18 + Vite, React Router, Tailwind CSS |
 | Motor (referência) | Python puro — `motor_simulacao.py`, só biblioteca padrão |
 | Motor (front-end) | JavaScript puro — `src/utils/diagnostico.js` |
-| Back-end | Flask — `app.py`, mínimo e demonstrativo |
 | Estado | Context API, sem biblioteca externa |
 | Ícones | SVG desenhados à mão em `src/components/Icons.jsx` |
 
@@ -100,32 +100,49 @@ estado ou de cálculo foi usada.
 
 O que o projeto **não** faz, e é bom deixar claro:
 
-- O front-end não conversa com o `app.py`. Ele funciona sozinho com os dados de
-  `src/data/mock.js`. O back-end existe para demonstrar que o mesmo motor
-  responde por HTTP.
-- Não há persistência. O `database.json` é lido pela rota `/api/chamados` e
-  nunca escrito; o que é criado nas telas vive em memória e se perde no reload.
+- Não há back-end. O front-end funciona sozinho com os dados de
+  `src/data/mock.js`; o motor em Python existe como referência da conta e roda
+  pelo terminal.
+- Não há persistência. O que é criado nas telas vive em memória e se perde no
+  reload.
 - O login é um seletor de perfil, sem autenticação.
 - Não há sensor, telemetria nem hardware. É proposital: a proposta é atender
   justamente o elevador que não tem sensor.
 
-## Rodando o lado Python
+## Aderência tecnológica
 
-O GitHub Pages não executa código de servidor, então essas duas partes só rodam
-localmente.
+O Challenge restringe o projeto ao que foi ensinado até a Fase 7, com uma
+exceção explícita para o MVP da empresa parceira: *"para a construção do MVP
+para a OTIS, pode-se utilizar outras tecnologias"*. Abaixo, onde cada coisa que
+o projeto usa foi ensinada.
 
-```bash
-pip install -r requirements.txt
-python app.py            # http://localhost:5000
-```
+| O que o projeto usa | Trilha · Fase |
+|---|---|
+| React, componentes e JSX | T3 React · Fase 5 |
+| `props`, `useState`, `useEffect` | T3 React · Fase 6 |
+| Rotas com `react-router-dom` | T3 React · Fase 7 |
+| Vite e npm | T3 React |
+| Python do motor de diagnóstico | T4 Python: dados, arquivos e banco |
+| JSON | T4 · Fase 6 |
+| HTML5 e CSS3 | Front-End Design · 1º semestre |
+| DOM e `sessionStorage` | 1º semestre |
+| Git e GitHub | 1º semestre · Fase 2 |
 
-| Rota | Método | O que faz |
-|---|---|---|
-| `/api/health` | GET | Confirma que o servidor está no ar |
-| `/api/diagnosticar` | POST | Recebe `{"respostas": {"P1": "Sim", ...}}` e devolve o diagnóstico |
-| `/api/chamados` | GET | Devolve os chamados de `database.json` |
+Duas coisas vão além do conteúdo das trilhas, e ficam declaradas:
 
-Para ver a conta sem subir nada:
+- **Tailwind CSS.** O curso ensina Bootstrap 5, SASS e styled-components para
+  estilização. O Tailwind entra pela exceção do MVP.
+- **Context API (`createContext` / `useContext`), `useMemo` e `useRef`.** São
+  APIs do próprio React da T3, além das que a trilha cobre.
+
+Fora isso, nenhuma dependência externa: o `package.json` lista apenas `react`,
+`react-dom` e `react-router-dom`, e o motor em Python usa só a biblioteca
+padrão.
+
+## Rodando o motor em Python
+
+Não precisa de instalação — o motor usa apenas `json` e `sys`, sem nenhuma
+dependência externa.
 
 ```bash
 python motor_simulacao.py
@@ -204,10 +221,7 @@ A logo está em `src/components/Logo.jsx`, em SVG, e serve também de favicon
 ## Estrutura
 
 ```
-app.py                  back-end Flask demonstrativo
 motor_simulacao.py      motor de diagnóstico em Python — a referência
-database.json           chamados de exemplo para /api/chamados
-requirements.txt        flask e flask-cors
 src/
 ├── components/         layouts, primitivos de interface e ícones
 ├── data/mock.js        matriz de pesos e dados de exemplo
